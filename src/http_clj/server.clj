@@ -3,6 +3,10 @@
 
 (defrecord Server [server-socket]
   component/Lifecycle
+
+  (start [component]
+    component)
+
   (stop [component]
     (.close (:server-socket component))
     component))
