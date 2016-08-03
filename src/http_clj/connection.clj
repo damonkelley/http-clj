@@ -1,18 +1,16 @@
-(ns http-clj.connection)
-
-(import java.io.InputStreamReader
-        java.io.BufferedReader
-        java.io.PrintWriter)
+(ns http-clj.connection
+ (:require [clojure.java.io :as io]))
 
 (defrecord Connection [connection reader])
 
 (defn new-connection [socket]
   (map->Connection {:socket socket
-                    :reader (BufferedReader. (InputStreamReader. (.getInputStream socket)))
-                    :writer (PrintWriter. (.getOutputStream socket) true)}))
+                    :reader (io/reader socket)
+                    :writer (io/writer socket)}))
 
 (defn readline [connection]
   (.readLine (:reader connection)))
 
 (defn write [connection output]
-  (.println (:writer connection) output))
+  (.write (:writer connection) (str output \newline))
+  (.flush (:writer connection)))
