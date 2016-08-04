@@ -4,7 +4,7 @@
             [com.stuartsierra.component :as component]))
 
 (def ^:private is-open
-  (atom true))
+ (atom true))
 
 (defn socket []
   (proxy [java.net.Socket] []))
@@ -17,10 +17,10 @@
       (reset! is-open false))))
 
 (describe "a server component"
-          (with server (new-server (mock-server)))
-          (it "will close the server"
-              (should= true @is-open)
-              (component/stop @server)
-              (should= false @is-open))
-          (it "will accept connections"
-              (should-be-a java.net.Socket (accept @server))))
+  (with server (new-server (mock-server)))
+  (it "will close the server"
+    (should= true @is-open)
+    (component/stop @server)
+    (should= false @is-open))
+  (it "will accept connections"
+    (should-be-a java.net.Socket (accept @server))))
