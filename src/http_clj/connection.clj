@@ -14,3 +14,7 @@
 (defn write [connection output]
   (.write (:writer connection) (str output \newline))
   (.flush (:writer connection)))
+
+(defn close [connection]
+  (.close (:socket connection))
+  (assoc connection :socket nil))

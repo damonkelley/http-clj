@@ -3,19 +3,31 @@
            java.io.ByteArrayOutputStream))
 
 
-(def ^:private is-open
-  (atom true))
+(def socket-connected? (atom true))
 
 (defn mock-socket [input output]
+  (reset! socket-connected? true)
   (proxy [java.net.Socket] []
-    (getOutputStream [] output)
+    (close []
+      (reset! socket-connected? false))
+
+    (isClosed []
+      (not @socket-connected?))
+
+    (getOutputStream []
+      output)
+
     (getInputStream []
       (ByteArrayInputStream.
         (.getBytes input)))))
 
 
+(def is-open (atom true))
+
 (defn mock-server []
   (proxy [java.net.ServerSocket] []
     (accept []
       (mock-socket "" (ByteArrayOutputStream.)))
-    (close []false)))
+
+    (close []
+      false)))
