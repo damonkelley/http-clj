@@ -1,27 +1,20 @@
 (ns http-clj.connection-spec
- (:require [speclj.core :refer :all]
-           [http-clj.connection :refer :all]))
+  (:require [speclj.core :refer :all]
+            [http-clj.connection :refer [write readline new-connection]]
+            [http-clj.helpers :refer [mock-socket]])
+  (:import java.io.ByteArrayInputStream
+           java.io.ByteArrayOutputStream))
 
-(import java.io.ByteArrayInputStream
-        java.io.ByteArrayOutputStream)
 
 (def output
   (ByteArrayOutputStream.))
 
-(def mock-socket
-  (proxy [java.net.Socket] []
-    (getOutputStream [] output)
-    (getInputStream []
-      (ByteArrayInputStream.
-        (.getBytes "mock connection input data\nmore data from input")))))
 
 (describe "a connection"
-          (with conn (new-connection mock-socket))
-          (it "is constructed from a socket"
-              (should= mock-socket (:socket @conn)))
-          (it "can be read from"
-              (should= "mock connection input data" (readline @conn))
-              (should= "more data from input" (readline @conn)))
-          (it "can be written to"
-              (write @conn "data written to out")
-              (should= "data written to out\n" (.toString output))))
+  (with conn (new-connection (mock-socket "line 1\nline 2" output)))
+  (it "can be read from"
+    (should= "line 1" (readline @conn))
+    (should= "line 2" (readline @conn)))
+  (it "can be written to"
+    (write @conn "data written to out")
+    (should= "data written to out\n" (.toString output))))

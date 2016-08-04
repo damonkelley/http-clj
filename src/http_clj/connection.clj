@@ -1,5 +1,5 @@
 (ns http-clj.connection
- (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]))
 
 (defrecord Connection [connection reader])
 
