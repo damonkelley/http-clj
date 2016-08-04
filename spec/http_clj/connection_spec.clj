@@ -12,13 +12,20 @@
 
 (describe "a connection"
   (with conn (new-connection (helpers/mock-socket "line 1\nline 2" output)))
+
   (it "can be read from"
     (should= "line 1" (readline @conn))
     (should= "line 2" (readline @conn)))
+
+  (it "will yield a connection when written to"
+   (should= @conn (write @conn "")))
+
   (it "can be written to"
     (write @conn "data written to out")
-    (should= "data written to out\n" (.toString output)))
-  (it "is can be closed"
+    (should= "data written to out" (.toString output)))
+
+
+  (it "can be closed"
      (should= false (.isClosed (:socket @conn)))
      (should= nil (:socket (close @conn)))
      (should= true (.isClosed (:socket @conn)))))

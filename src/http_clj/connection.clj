@@ -12,8 +12,9 @@
   (.readLine (:reader connection)))
 
 (defn write [connection output]
-  (.write (:writer connection) (str output \newline))
-  (.flush (:writer connection)))
+  (.write (:writer connection) output)
+  (.flush (:writer connection))
+  connection)
 
 (defn close [connection]
   (.close (:socket connection))

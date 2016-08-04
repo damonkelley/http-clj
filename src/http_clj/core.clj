@@ -4,7 +4,7 @@
 
 
 (defn- echo [text conn]
-  (connection/write conn text)
+  (connection/write conn (str text \newline))
   conn)
 
 (defn echo-loop [conn]
