@@ -3,23 +3,21 @@
            java.io.ByteArrayOutputStream))
 
 
-(def socket-connected? (atom true))
-
 (defn mock-socket [input output]
-  (reset! socket-connected? true)
-  (proxy [java.net.Socket] []
-    (close []
-      (reset! socket-connected? false))
+  (let [connected? (atom true)]
+   (proxy [java.net.Socket] []
+     (close []
+       (reset! connected? false))
 
-    (isClosed []
-      (not @socket-connected?))
+     (isClosed []
+       (not @connected?))
 
-    (getOutputStream []
-      output)
+     (getOutputStream []
+       output)
 
-    (getInputStream []
-      (ByteArrayInputStream.
-        (.getBytes input)))))
+     (getInputStream []
+       (ByteArrayInputStream.
+         (.getBytes input))))))
 
 
 (def is-open (atom true))
