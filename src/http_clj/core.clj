@@ -1,6 +1,8 @@
 (ns http-clj.core
- (:require [http-clj.connection :as connection])
- (:import java.net.ServerSocket))
+  (:require [http-clj.connection :as connection]
+            [http-clj.server :as server]
+            [com.stuartsierra.component :as component])
+  (:import java.net.ServerSocket))
 
 
 (defn- echo [text conn]
@@ -9,7 +11,28 @@
 
 (defn echo-loop [conn]
   (loop [conn conn]
-   (let [text (connection/readline conn)]
-     (if (= "bye." text)
-       (echo "Goodbye" conn)
-       (recur (echo text conn))))))
+    (let [text (connection/readline conn)]
+      (if (= "bye." text)
+        (echo "Goodbye" conn)
+        (recur (echo text conn))))))
+
+(defn- listen [socket-server]
+  (-> socket-server
+      (server/accept)
+      (connection/new-connection)
+      (echo-loop)
+      (connection/close))
+  socket-server)
+
+(defn- listen-until-interrupt [socket-server]
+  (if (Thread/interrupted)
+    socket-server
+    (recur (listen socket-server))))
+
+(defn -main [& args]
+  (let [socket-server (server/new-server (ServerSocket. 5000))]
+    (try
+      (component/start socket-server)
+      (listen-until-interrupt socket-server)
+      (finally
+        (component/stop socket-server)))))
