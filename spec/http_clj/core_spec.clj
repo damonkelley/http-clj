@@ -27,6 +27,10 @@
   (pass-through-blocking-accept))
 
 
+(defn warmup []
+  (Thread/sleep 100))
+
+
 (describe "an echo-server"
   (context "the echo loop"
     (with output (ByteArrayOutputStream.))
@@ -38,6 +42,7 @@
   (context "the server"
     (around [it]
       (let [thread (start-server)]
+        (warmup)
         (it)
         (shutdown-server thread)))
 
