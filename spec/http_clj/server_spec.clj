@@ -17,7 +17,7 @@
       (reset! is-open false))))
 
 (describe "a server component"
-  (with server (new-server (mock-server)))
+  (with server (create (mock-server)))
   (it "will close the server"
     (should= true @is-open)
     (component/stop @server)

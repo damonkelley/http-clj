@@ -11,7 +11,7 @@
     (.close (:server-socket component))
     component))
 
-(defn new-server [server-socket]
+(defn create [server-socket]
   (map->Server {:server-socket server-socket}))
 
 (defn accept [component]

@@ -29,7 +29,7 @@
     (recur (listen socket-server))))
 
 (defn -main [& args]
-  (-> (server/new-server (ServerSocket. 5000))
+  (-> (server/create (ServerSocket. 5000))
       (component/start)
       (listen-until-interrupt)
       (component/stop)))
