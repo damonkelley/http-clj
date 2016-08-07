@@ -17,7 +17,7 @@
   (try
     (connection/close
       (connection/write
-        (connection/new-connection (Socket. "localhost" 5000))
+        (connection/create (Socket. "localhost" 5000))
         "bye.\n"))
     (catch java.net.ConnectException e nil)))
 
@@ -36,7 +36,7 @@
     (with output (ByteArrayOutputStream.))
 
     (it "echos until it receives bye."
-      (echo-loop (connection/new-connection (mock-socket "foo\nbye." @output)))
+      (echo-loop (connection/create (mock-socket "foo\nbye." @output)))
       (should= "foo\nGoodbye\n" (.toString @output))))
 
   (context "the server"
@@ -47,7 +47,7 @@
         (shutdown-server thread)))
 
     (it "echos back input and closes"
-      (let [client (connection/new-connection (Socket. "localhost" 5000))]
+      (let [client (connection/create (Socket. "localhost" 5000))]
 
         (connection/write client (str "foo" \newline
                                       "bye." \newline))
@@ -57,8 +57,8 @@
         (connection/close client)))
 
     (it "accepts connections in serial"
-      (let [client1 (connection/new-connection (Socket. "localhost" 5000))
-            client2 (connection/new-connection (Socket. "localhost" 5000))]
+      (let [client1 (connection/create (Socket. "localhost" 5000))
+            client2 (connection/create (Socket. "localhost" 5000))]
 
         (connection/write client1 (str "foo" \newline
                                        "bye." \newline))

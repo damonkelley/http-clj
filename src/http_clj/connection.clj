@@ -3,7 +3,7 @@
 
 (defrecord Connection [connection reader])
 
-(defn new-connection [socket]
+(defn create [socket]
   (map->Connection {:socket socket
                     :reader (io/reader socket)
                     :writer (io/writer socket)}))

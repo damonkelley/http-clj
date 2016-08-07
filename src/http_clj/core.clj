@@ -18,7 +18,7 @@
 (defn- listen [socket-server]
   (-> socket-server
       (server/accept)
-      (connection/new-connection)
+      (connection/create)
       (echo-loop)
       (connection/close))
   socket-server)
