@@ -30,9 +30,7 @@
     (recur (listen socket-server))))
 
 (defn -main [& args]
-  (let [socket-server (server/new-server (ServerSocket. 5000))]
-    (try
-      (component/start socket-server)
-      (listen-until-interrupt socket-server)
-      (finally
-        (component/stop socket-server)))))
+  (-> (server/new-server (ServerSocket. 5000))
+      (component/start)
+      (listen-until-interrupt)
+      (component/stop)))
