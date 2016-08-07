@@ -10,11 +10,10 @@
   conn)
 
 (defn echo-loop [conn]
-  (loop [conn conn]
-    (let [text (connection/readline conn)]
-      (if (= "bye." text)
-        (echo "Goodbye" conn)
-        (recur (echo text conn))))))
+  (let [text (connection/readline conn)]
+    (if (= "bye." text)
+      (echo "Goodbye" conn)
+      (recur (echo text conn)))))
 
 (defn- listen [socket-server]
   (-> socket-server
