@@ -43,7 +43,7 @@
     socket-server
     (recur (listen socket-server))))
 
-(defn -main [port & args]
+(defn run [port]
   (-> (create port)
       (component/start)
       (listen-until-interrupt)

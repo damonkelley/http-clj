@@ -11,9 +11,8 @@
 (def test-host "localhost")
 
 (defn start-server []
-  (let [thread (Thread. #(http-clj.server/-main test-port))]
-    (.start thread)
-    thread))
+  (doto (Thread. #(http-clj.server/run test-port))
+    (.start)))
 
 (defn pass-through-blocking-listener []
   (try
