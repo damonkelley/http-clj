@@ -6,24 +6,28 @@
   (:import java.io.ByteArrayOutputStream))
 
 
+(def test-port 5000)
+(def test-host "localhost")
+
+
 (defn start-server []
-  (let [thread (Thread. #(http-clj.core/-main 5000))]
+  (let [thread (Thread. #(http-clj.core/-main test-port))]
     (.start thread)
     thread))
 
 
-(defn pass-through-blocking-accept []
+(defn pass-through-blocking-listener []
   (try
     (connection/close
       (connection/write
-        (connection/create "localhost" 5000)
+        (connection/create test-host test-port)
         "bye.\n"))
     (catch java.net.ConnectException e nil)))
 
 
 (defn shutdown-server [thread]
   (.interrupt thread)
-  (pass-through-blocking-accept))
+  (pass-through-blocking-listener))
 
 
 (defn warmup []
@@ -46,7 +50,7 @@
         (shutdown-server thread)))
 
     (it "echos back input and closes"
-      (let [client (connection/create "localhost" 5000)]
+      (let [client (connection/create test-host test-port)]
 
         (connection/write client (str "foo" \newline
                                       "bye." \newline))
@@ -56,8 +60,8 @@
         (connection/close client)))
 
     (it "accepts connections in serial"
-      (let [client1 (connection/create "localhost" 5000)
-            client2 (connection/create "localhost" 5000)]
+      (let [client1 (connection/create test-host test-port)
+            client2 (connection/create test-host test-port)]
 
         (connection/write client1 (str "foo" \newline
                                        "bye." \newline))
