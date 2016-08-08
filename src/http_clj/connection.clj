@@ -2,13 +2,13 @@
   (:require [clojure.java.io :as io])
   (:import java.net.Socket))
 
-(defprotocol SocketConnection
+(defprotocol Connection
   (readline [conn])
   (write [conn output])
   (close [conn]))
 
-(defrecord Connection [socket reader writer]
-  SocketConnection
+(defrecord SocketConnection [socket reader writer]
+  Connection
 
   (readline [conn]
     (.readLine reader))
@@ -24,11 +24,11 @@
 
 (defn create
   ([socket]
-   (map->Connection {:socket socket
-                     :reader (io/reader socket)
-                     :writer (io/writer socket)}))
+   (map->SocketConnection {:socket socket
+                           :reader (io/reader socket)
+                           :writer (io/writer socket)}))
   ([host port]
    (let [socket (Socket. host port)]
-     (map->Connection {:socket socket
-                       :reader (io/reader socket)
-                       :writer (io/writer socket)}))))
+     (map->SocketConnection {:socket socket
+                             :reader (io/reader socket)
+                             :writer (io/writer socket)}))))
