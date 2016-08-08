@@ -20,12 +20,14 @@
          (.getBytes input))))))
 
 
-(def is-open (atom true))
-
 (defn mock-server []
-  (proxy [java.net.ServerSocket] []
-    (accept []
-      (mock-socket "" (ByteArrayOutputStream.)))
+  (let [closed? (atom false)]
+    (proxy [java.net.ServerSocket] []
+      (accept []
+        (mock-socket "" (ByteArrayOutputStream.)))
 
-    (close []
-      false)))
+      (close []
+        (reset! closed? true))
+
+      (isClosed []
+        @closed?))))
