@@ -3,8 +3,7 @@
             [http-clj.core :refer :all]
             [http-clj.connection :as connection]
             [http-clj.helpers :refer [mock-socket]])
-  (:import java.io.ByteArrayOutputStream
-           java.net.Socket))
+  (:import java.io.ByteArrayOutputStream))
 
 
 (defn start-server []
@@ -17,7 +16,7 @@
   (try
     (connection/close
       (connection/write
-        (connection/create (Socket. "localhost" 5000))
+        (connection/create "localhost" 5000)
         "bye.\n"))
     (catch java.net.ConnectException e nil)))
 
@@ -47,7 +46,7 @@
         (shutdown-server thread)))
 
     (it "echos back input and closes"
-      (let [client (connection/create (Socket. "localhost" 5000))]
+      (let [client (connection/create "localhost" 5000)]
 
         (connection/write client (str "foo" \newline
                                       "bye." \newline))
@@ -57,8 +56,8 @@
         (connection/close client)))
 
     (it "accepts connections in serial"
-      (let [client1 (connection/create (Socket. "localhost" 5000))
-            client2 (connection/create (Socket. "localhost" 5000))]
+      (let [client1 (connection/create "localhost" 5000)
+            client2 (connection/create "localhost" 5000)]
 
         (connection/write client1 (str "foo" \newline
                                        "bye." \newline))

@@ -1,21 +1,34 @@
 (ns http-clj.connection
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io])
+  (:import java.net.Socket))
 
-(defrecord Connection [connection reader])
+(defprotocol SocketConnection
+  (readline [conn])
+  (write [conn output])
+  (close [conn]))
 
-(defn create [socket]
-  (map->Connection {:socket socket
-                    :reader (io/reader socket)
-                    :writer (io/writer socket)}))
+(defrecord Connection [socket reader writer]
+  SocketConnection
 
-(defn readline [connection]
-  (.readLine (:reader connection)))
+  (readline [conn]
+    (.readLine reader))
 
-(defn write [connection output]
-  (.write (:writer connection) output)
-  (.flush (:writer connection))
-  connection)
+  (write [conn output]
+    (.write writer output)
+    (.flush writer)
+    conn)
 
-(defn close [connection]
-  (.close (:socket connection))
-  (assoc connection :socket nil))
+  (close [conn]
+    (.close socket)
+    (assoc conn :socket nil)))
+
+(defn create
+  ([socket]
+   (map->Connection {:socket socket
+                     :reader (io/reader socket)
+                     :writer (io/writer socket)}))
+  ([host port]
+   (let [socket (Socket. host port)]
+     (map->Connection {:socket socket
+                       :reader (io/reader socket)
+                       :writer (io/writer socket)}))))
