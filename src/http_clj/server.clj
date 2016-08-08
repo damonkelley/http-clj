@@ -1,6 +1,7 @@
 (ns http-clj.server
   (:require [com.stuartsierra.component :as component]
-            [http-clj.connection :as connection])
+            [http-clj.connection :as connection]
+            [http-clj.echo :as echo])
   (:import java.net.ServerSocket))
 
 (defprotocol AcceptingServer
@@ -29,25 +30,11 @@
   [server-socket]
   (map->Server {:server-socket server-socket}))
 
-
-(def exit-signal "bye.")
-(def exit-message "Goodbye")
-
-(defn- echo [text conn]
-  (connection/write conn (str text \newline))
-  conn)
-
-(defn echo-loop [conn]
-  (let [text (connection/readline conn)]
-    (if (= exit-signal text)
-      (echo exit-message conn)
-      (recur (echo text conn)))))
-
 (defn- listen [socket-server]
   (-> socket-server
       (accept)
       (connection/create)
-      (echo-loop)
+      (echo/echo-loop)
       (connection/close))
   socket-server)
 

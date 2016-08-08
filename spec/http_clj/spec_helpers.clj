@@ -2,7 +2,6 @@
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
-
 (defn mock-socket [input output]
   (let [connected? (atom true)]
    (proxy [java.net.Socket] []
@@ -18,7 +17,6 @@
      (getInputStream []
        (ByteArrayInputStream.
          (.getBytes input))))))
-
 
 (defn mock-server []
   (let [closed? (atom false)]

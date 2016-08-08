@@ -5,10 +5,8 @@
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
-
 (def output
   (ByteArrayOutputStream.))
-
 
 (describe "a connection"
   (with conn (create (helpers/mock-socket "line 1\nline 2" output)))
@@ -23,7 +21,6 @@
   (it "can be written to"
     (write @conn "data written to out")
     (should= "data written to out" (.toString output)))
-
 
   (it "can be closed"
      (should= false (.isClosed (:socket @conn)))

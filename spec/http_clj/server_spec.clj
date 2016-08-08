@@ -1,21 +1,19 @@
 (ns http-clj.server-spec
   (:require [speclj.core :refer :all]
-            [http-clj.server :refer [accept create echo-loop]]
+            [http-clj.server :refer [accept create]]
             [http-clj.connection :as connection]
             [http-clj.spec-helpers :refer [mock-server mock-socket]]
             [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayOutputStream))
 
-
 (def test-port 5000)
-(def test-host "localhost")
 
+(def test-host "localhost")
 
 (defn start-server []
   (let [thread (Thread. #(http-clj.core/-main test-port))]
     (.start thread)
     thread))
-
 
 (defn pass-through-blocking-listener []
   (try
@@ -24,20 +22,15 @@
         (connection/close))
     (catch java.net.ConnectException e nil)))
 
-
 (defn shutdown-server [thread]
   (.interrupt thread)
   (pass-through-blocking-listener))
 
-
 (defn warmup []
   (Thread/sleep 100))
 
-
 (describe "a server"
   (context "as a component"
-    (with server (create (mock-server)))
-
     (it "can be created using a port"
       (let [server (create 5001)]
         (should-be-a java.net.ServerSocket (:server-socket server))
