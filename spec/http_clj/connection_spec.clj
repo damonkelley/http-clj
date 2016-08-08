@@ -1,7 +1,7 @@
 (ns http-clj.connection-spec
   (:require [speclj.core :refer :all]
             [http-clj.connection :refer [write readline create close]]
-            [http-clj.spec-helpers :as helpers])
+            [http-clj.mock :as mock])
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
@@ -9,7 +9,7 @@
   (ByteArrayOutputStream.))
 
 (describe "a connection"
-  (with conn (create (helpers/mock-socket "line 1\nline 2" output)))
+  (with conn (create (mock/socket "line 1\nline 2" output)))
 
   (it "can be read from"
     (should= "line 1" (readline @conn))

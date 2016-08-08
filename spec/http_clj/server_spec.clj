@@ -2,7 +2,7 @@
   (:require [speclj.core :refer :all]
             [http-clj.server :refer [accept create]]
             [http-clj.connection :as connection]
-            [http-clj.spec-helpers :refer [mock-server mock-socket]]
+            [http-clj.mock :as mock]
             [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayOutputStream))
 
@@ -11,7 +11,7 @@
 (def test-host "localhost")
 
 (defn start-server []
-  (let [thread (Thread. #(http-clj.core/-main test-port))]
+  (let [thread (Thread. #(http-clj.server/-main test-port))]
     (.start thread)
     thread))
 
@@ -37,11 +37,11 @@
         (component/stop server)))
 
     (it "can be created by injecting a ServerSocket"
-      (let [server (create (mock-server))]
+      (let [server (create (mock/server))]
         (should-be-a java.net.ServerSocket (:server-socket server))))
 
     (it "will close the server"
-      (let [server-socket (mock-server)
+      (let [server-socket (mock/server)
             server (create server-socket)]
         (should= false (.isClosed server-socket))
         (component/stop server)
@@ -49,7 +49,7 @@
 
     (it "will accept connections"
       (should-be-a java.net.Socket
-                   (-> (mock-server)
+                   (-> (mock/server)
                        (create)
                        (accept)))))
 

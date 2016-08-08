@@ -1,8 +1,8 @@
-(ns http-clj.spec-helpers
+(ns http-clj.mock
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
-(defn mock-socket [input output]
+(defn socket [input output]
   (let [connected? (atom true)]
    (proxy [java.net.Socket] []
      (close []
@@ -18,11 +18,11 @@
        (ByteArrayInputStream.
          (.getBytes input))))))
 
-(defn mock-server []
+(defn server []
   (let [closed? (atom false)]
     (proxy [java.net.ServerSocket] []
       (accept []
-        (mock-socket "" (ByteArrayOutputStream.)))
+        (socket "" (ByteArrayOutputStream.)))
 
       (close []
         (reset! closed? true))
