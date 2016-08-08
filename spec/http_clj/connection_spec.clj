@@ -1,7 +1,7 @@
 (ns http-clj.connection-spec
   (:require [speclj.core :refer :all]
             [http-clj.connection :refer [write readline create close]]
-            [http-clj.helpers :as helpers])
+            [http-clj.spec-helpers :as helpers])
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 

@@ -2,7 +2,7 @@
   (:require [speclj.core :refer :all]
             [http-clj.core :refer :all]
             [http-clj.connection :as connection]
-            [http-clj.helpers :refer [mock-socket]])
+            [http-clj.spec-helpers :refer [mock-socket]])
   (:import java.io.ByteArrayOutputStream))
 
 

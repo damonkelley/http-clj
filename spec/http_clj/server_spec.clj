@@ -1,7 +1,7 @@
 (ns http-clj.server-spec
   (:require [speclj.core :refer :all]
             [http-clj.server :refer [accept create]]
-            [http-clj.helpers :refer [mock-server]]
+            [http-clj.spec-helpers :refer [mock-server]]
             [com.stuartsierra.component :as component]))
 
 

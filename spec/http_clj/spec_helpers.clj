@@ -1,4 +1,4 @@
-(ns http-clj.helpers
+(ns http-clj.spec-helpers
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
