@@ -28,8 +28,8 @@
     socket-server
     (recur (listen socket-server))))
 
-(defn -main [& args]
-  (-> (server/create (ServerSocket. 5000))
+(defn -main [port & args]
+  (-> (server/create port)
       (component/start)
       (listen-until-interrupt)
       (component/stop)))

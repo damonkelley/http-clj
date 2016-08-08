@@ -7,7 +7,7 @@
 
 
 (defn start-server []
-  (let [thread (Thread. http-clj.core/-main)]
+  (let [thread (Thread. #(http-clj.core/-main 5000))]
     (.start thread)
     thread))
 
