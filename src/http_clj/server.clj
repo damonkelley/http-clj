@@ -19,14 +19,12 @@
   (accept [component]
     (.accept server-socket)))
 
-(defmulti create
-  (fn [option] (number? option))
-  :default nil)
+(defmulti create type)
 
-(defmethod create true
+(defmethod create Number
   [port]
-  (map->Server {:server-socket (java.net.ServerSocket. port)}))
+  (map->Server {:server-socket (ServerSocket. port)}))
 
-(defmethod create false
+(defmethod create ServerSocket
   [server-socket]
   (map->Server {:server-socket server-socket}))
