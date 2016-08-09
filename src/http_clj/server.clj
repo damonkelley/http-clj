@@ -29,18 +29,16 @@
   [server-socket]
   (map->Server {:server-socket server-socket}))
 
-(defn- listen [server app]
-  (-> server
-      (accept)
+(defn listen [server app]
+  (-> (accept server)
       (app)
-      (connection/close))
-  server)
+      (connection/close)))
 
 (defn- listen-until-interrupt [server app]
-  (loop [server server]
+  (loop []
     (if (Thread/interrupted)
       server
-      (recur (listen server app)))))
+      (do (listen server app) (recur)))))
 
 (defn run [app port]
   (-> (create port)

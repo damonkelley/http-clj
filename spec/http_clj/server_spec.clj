@@ -2,6 +2,7 @@
   (:require [speclj.core :refer :all]
             [http-clj.server :refer [accept
                                      create
+                                     listen
                                      AcceptingServer]]
             [http-clj.connection :as connection]
             [http-clj.mock :as mock]
@@ -30,3 +31,28 @@
                               (-> (mock/server)
                                   (create)
                                   (accept))))))
+
+(defrecord MockConnection [open]
+  connection/Connection
+  (readline [conn] "")
+
+  (write [conn output] conn)
+
+  (close [conn]
+    (assoc conn :open false)))
+
+(defrecord MockServer []
+  AcceptingServer
+  (accept [server]
+    (MockConnection. true)))
+
+(defn test-app [conn]
+  (when (not (:open conn))
+    (should-fail "The connection should be open"))
+  (assoc conn :app-called true))
+
+(describe "listen"
+  (it "opens and closes connection"
+    (should= false (:open (listen (MockServer.) identity))))
+  (it "the application is sandwiched between opening and closing the connection"
+    (should= true (:app-called (listen (MockServer.) test-app)))))
