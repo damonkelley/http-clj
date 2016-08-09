@@ -61,10 +61,8 @@
 
     (it "echos back input and closes"
       (let [client (connection/create test-host test-port)]
-
         (connection/write client (str "foo" \newline
                                       "bye." \newline))
-
         (should= "foo" (connection/readline client))
         (should= "Goodbye" (connection/readline client))
         (connection/close client)))
@@ -72,10 +70,8 @@
     (it "accepts connections in serial"
       (let [client1 (connection/create test-host test-port)
             client2 (connection/create test-host test-port)]
-
         (connection/write client1 (str "foo" \newline
                                        "bye." \newline))
-
         (connection/write client2 (str "foo" \newline
                                        "bar" \newline
                                        "bye." \newline))
