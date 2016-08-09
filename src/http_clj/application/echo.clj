@@ -1,4 +1,4 @@
-(ns http-clj.echo.application
+(ns http-clj.application.echo
   (:require [http-clj.connection :as connection]
             [http-clj.server :refer [run]]))
 

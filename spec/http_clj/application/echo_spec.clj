@@ -1,16 +1,13 @@
-(ns http-clj.echo.application-spec
+(ns http-clj.application.echo-spec
   (:require [speclj.core :refer :all]
-            [http-clj.echo.application :refer [echo-loop]]
+            [http-clj.application.echo :refer [echo-loop]]
             [http-clj.connection :as connection]
-            [http-clj.mock :as mock])
+            [http-clj.mock :as mock]
+            [http-clj.spec.integration :refer [start-server warmup shutdown-server]])
   (:import java.io.ByteArrayOutputStream))
 
 (def test-port 5000)
 (def test-host "localhost")
-
-(defn start-server []
-  (doto (Thread. #(http-clj.server/run echo-loop test-port))
-    (.start)))
 
 (defn pass-through-blocking-listener []
   (try
@@ -18,13 +15,6 @@
         (connection/write "bye.\n")
         (connection/close))
     (catch java.net.ConnectException e nil)))
-
-(defn shutdown-server [thread]
-  (.interrupt thread)
-  (pass-through-blocking-listener))
-
-(defn warmup []
-  (Thread/sleep 100))
 
 (describe "the echo loop"
   (it "echos until it receives bye."
@@ -34,10 +24,10 @@
 
 (describe "the echo-server"
   (around [it]
-    (let [thread (start-server)]
+    (let [thread (start-server echo-loop test-port)]
       (warmup)
       (it)
-      (shutdown-server thread)))
+      (shutdown-server thread pass-through-blocking-listener)))
 
   (it "echos back input and closes"
     (let [client (connection/create test-host test-port)]
