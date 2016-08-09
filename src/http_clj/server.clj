@@ -1,7 +1,6 @@
 (ns http-clj.server
   (:require [com.stuartsierra.component :as component]
-            [http-clj.connection :as connection]
-            [http-clj.echo :as echo])
+            [http-clj.connection :as connection])
   (:import java.net.ServerSocket))
 
 (defprotocol AcceptingServer
@@ -18,7 +17,7 @@
 
   AcceptingServer
   (accept [component]
-    (.accept server-socket)))
+    (connection/create (.accept server-socket))))
 
 (defmulti create type)
 
@@ -30,21 +29,21 @@
   [server-socket]
   (map->Server {:server-socket server-socket}))
 
-(defn- listen [socket-server]
-  (-> socket-server
+(defn- listen [server app]
+  (-> server
       (accept)
-      (connection/create)
-      (echo/echo-loop)
+      (app)
       (connection/close))
-  socket-server)
+  server)
 
-(defn- listen-until-interrupt [socket-server]
-  (if (Thread/interrupted)
-    socket-server
-    (recur (listen socket-server))))
+(defn- listen-until-interrupt [server app]
+  (loop [server server]
+    (if (Thread/interrupted)
+      server
+      (recur (listen server app)))))
 
-(defn run [port]
+(defn run [app port]
   (-> (create port)
       (component/start)
-      (listen-until-interrupt)
+      (listen-until-interrupt app)
       (component/stop)))

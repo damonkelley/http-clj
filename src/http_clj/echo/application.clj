@@ -1,5 +1,6 @@
-(ns http-clj.echo
-  (:require [http-clj.connection :as connection]))
+(ns http-clj.echo.application
+  (:require [http-clj.connection :as connection]
+            [http-clj.server :refer [run]]))
 
 (def exit-signal "bye.")
 (def exit-message "Goodbye")
@@ -13,3 +14,6 @@
     (if (= exit-signal text)
       (echo exit-message conn)
       (recur (echo text conn)))))
+
+(defn -main [& args]
+  (run echo-loop 5000))
