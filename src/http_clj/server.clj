@@ -1,7 +1,8 @@
 (ns http-clj.server
   (:require [com.stuartsierra.component :as component]
             [http-clj.connection :as connection])
-  (:import java.net.ServerSocket))
+  (:import java.net.ServerSocket
+           java.util.concurrent.CountDownLatch))
 
 (defprotocol AcceptingServer
   (accept [component]))
@@ -40,8 +41,14 @@
       server
       (do (listen server app) (recur)))))
 
-(defn run [app port]
-  (-> (create port)
-      (component/start)
-      (listen-until-interrupt app)
-      (component/stop)))
+(defn- open-latch [server latch]
+  (.countDown latch)
+  server)
+
+(defn run
+  ([app port] (run app port (CountDownLatch. 0)))
+  ([app port latch] (-> (create port)
+                        (component/start)
+                        (open-latch latch)
+                        (listen-until-interrupt app)
+                        (component/stop))))

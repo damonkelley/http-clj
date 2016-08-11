@@ -8,8 +8,9 @@
 
 (describe "hello world"
   (around [it]
-    (let [thread (integration/start-server app 5000)]
-      (Thread/sleep 100)
+    (let [latch (integration/new-latch)
+          thread (integration/start-server app 5000 latch)]
+      (.await latch)
       (.interrupt thread)
       (it)))
 

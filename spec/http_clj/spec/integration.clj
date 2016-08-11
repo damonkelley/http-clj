@@ -1,7 +1,11 @@
-(ns http-clj.spec.integration)
+(ns http-clj.spec.integration
+  (:import java.util.concurrent.CountDownLatch))
 
-(defn start-server [app port]
-  (doto (Thread. #(http-clj.server/run app port))
+(defn new-latch []
+  (CountDownLatch. 1))
+
+(defn start-server [app port latch]
+  (doto (Thread. #(http-clj.server/run app port latch))
     (.start)))
 
 (defn shutdown-server
@@ -10,6 +14,3 @@
   ([thread f]
    (.interrupt thread)
    (f)))
-
-(defn warmup []
-  (Thread/sleep 100))

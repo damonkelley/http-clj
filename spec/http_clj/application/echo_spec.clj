@@ -3,7 +3,7 @@
             [http-clj.application.echo :refer [echo-loop]]
             [http-clj.connection :as connection]
             [http-clj.mock :as mock]
-            [http-clj.spec.integration :refer [start-server warmup shutdown-server]])
+            [http-clj.spec.integration :refer [new-latch start-server shutdown-server]])
   (:import java.io.ByteArrayOutputStream))
 
 (def test-port 5000)
@@ -24,8 +24,9 @@
 
 (describe "the echo-server"
   (around [it]
-    (let [thread (start-server echo-loop test-port)]
-      (warmup)
+    (let [latch (new-latch)
+          thread (start-server echo-loop test-port latch)]
+      (.await latch)
       (it)
       (shutdown-server thread pass-through-blocking-listener)))
 
