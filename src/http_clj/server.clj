@@ -45,10 +45,13 @@
   (.countDown latch)
   server)
 
-(defn run
-  ([app port] (run app port (CountDownLatch. 0)))
-  ([app port latch] (-> (create port)
-                        (component/start)
-                        (open-latch latch)
-                        (listen-until-interrupt app)
-                        (component/stop))))
+(defn serve
+  ([server app] (serve server app (CountDownLatch. 0)))
+  ([server app latch] (-> server
+                          (component/start)
+                          (open-latch latch)
+                          (listen-until-interrupt app)
+                          (component/stop))))
+
+(defn run [app port]
+  (serve (create port) app))

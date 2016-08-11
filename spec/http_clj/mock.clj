@@ -1,6 +1,7 @@
 (ns http-clj.mock
   (:require [http-clj.connection :as connection]
-            [http-clj.server :as server])
+            [http-clj.server :as server]
+            [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
@@ -44,11 +45,19 @@
 (defn connection []
   (MockConnection. true))
 
-(defrecord MockServer []
+(defrecord MockServer [started stopped]
+  component/Lifecycle
+  (start [server]
+    (assoc server :started true))
+
+  (stop [server]
+    (-> server
+        (assoc :stopped true)))
+
   server/AcceptingServer
   (accept [server]
     (MockConnection. true)))
 
 (defn server []
-  (MockServer.))
+  (MockServer. false false))
 

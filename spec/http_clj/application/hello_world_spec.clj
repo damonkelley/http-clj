@@ -2,6 +2,7 @@
   (:require [speclj.core :refer :all]
             [clj-http.client :as client]
             [http-clj.mock :as mock]
+            [http-clj.server :as s]
             [http-clj.application.hello-world :refer [app]])
   (:import java.util.concurrent.CountDownLatch))
 
@@ -9,7 +10,7 @@
   (CountDownLatch. 1))
 
 (defn start-server [app port latch]
-  (doto (Thread. #(http-clj.server/run app port latch))
+  (doto (Thread. #(s/serve (s/create port) app latch))
     (.start)))
 
 (defn shutdown-server
