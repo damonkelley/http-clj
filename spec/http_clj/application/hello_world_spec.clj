@@ -1,15 +1,25 @@
 (ns http-clj.application.hello-world-spec
   (:require [speclj.core :refer :all]
             [clj-http.client :as client]
-            [http-clj.spec.integration :as integration]
             [http-clj.mock :as mock]
-            [http-clj.application.hello-world :refer [app]]))
+            [http-clj.application.hello-world :refer [app]])
+  (:import java.util.concurrent.CountDownLatch))
 
+(defn new-latch []
+  (CountDownLatch. 1))
+
+(defn start-server [app port latch]
+  (doto (Thread. #(http-clj.server/run app port latch))
+    (.start)))
+
+(defn shutdown-server
+  ([thread]
+   (.interrupt thread)))
 
 (describe "hello world"
   (around [it]
-    (let [latch (integration/new-latch)
-          thread (integration/start-server app 5000 latch)]
+    (let [latch (new-latch)
+          thread (start-server app 5000 latch)]
       (.await latch)
       (.interrupt thread)
       (it)))
