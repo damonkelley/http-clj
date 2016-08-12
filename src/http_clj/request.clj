@@ -1,7 +1,6 @@
 (ns http-clj.request
   (:require [http-clj.connection :as connection]))
 
-
 (defn read-all [conn]
   (loop [conn conn lines []]
     (let [line (connection/readline conn)]

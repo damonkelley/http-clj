@@ -21,7 +21,6 @@
     (connection/create (.accept server-socket))))
 
 (defmulti create type)
-
 (defmethod create Number
   [port]
   (map->Server {:server-socket (ServerSocket. port)}))

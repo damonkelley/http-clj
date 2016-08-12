@@ -65,4 +65,3 @@
 
 (defn server []
   (MockServer. false false))
-
