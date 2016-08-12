@@ -35,10 +35,12 @@
   (assoc conn :app-called true))
 
 (describe "listen"
+  (with server (mock/server))
   (it "opens and closes connection"
-    (should= false (:open (s/listen (mock/server) identity))))
+    (should= false (:open (s/listen @server identity))))
+
   (it "the application is sandwiched between opening and closing the connection"
-    (should= true (:app-called (s/listen (mock/server) test-app)))))
+    (should= true (:app-called (s/listen @server test-app)))))
 
 (defn interrupting-app [conn]
   (loop [count 3]
@@ -52,7 +54,9 @@
   (with server (mock/server))
   (it "starts the component"
     (should= true (:started (s/serve @server interrupting-app))))
+
   (it "listens until interrupted"
     (s/serve @server interrupting-app))
+
   (it "stops the component"
     (should= true (:stopped (s/serve @server interrupting-app)))))
