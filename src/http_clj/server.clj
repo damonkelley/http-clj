@@ -34,22 +34,22 @@
       (app)
       (connection/close)))
 
-(defn- listen-until-interrupt [server app]
+(defn- open-latch [latch]
+  (.countDown latch))
+
+(defn- listen-until-interrupt [server app latch]
   (loop []
     (if (Thread/interrupted)
       server
-      (do (listen server app) (recur)))))
-
-(defn- open-latch [server latch]
-  (.countDown latch)
-  server)
+      (do (open-latch latch)
+          (listen server app)
+          (recur)))))
 
 (defn serve
   ([server app] (serve server app (CountDownLatch. 0)))
   ([server app latch] (-> server
                           (component/start)
-                          (open-latch latch)
-                          (listen-until-interrupt app)
+                          (listen-until-interrupt app latch)
                           (component/stop))))
 
 (defn run [app port]
