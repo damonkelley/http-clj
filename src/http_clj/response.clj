@@ -1,10 +1,11 @@
 (ns http-clj.response)
 
-(defn create [body]
-  {:body body})
+(defn create [request body]
+  {:body body
+   :conn (:conn request)})
 
 (defn compose [resp]
-  (str "HTTP/1.1 200 OK" \return \newline
-       \return \newline
-       (:body resp)
-       \return \newline))
+  (assoc resp :message (str "HTTP/1.1 200 OK\r\n"
+                            "\r\n"
+                            (:body resp)
+                            "\r\n")))
