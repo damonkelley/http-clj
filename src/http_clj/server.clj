@@ -38,12 +38,10 @@
   (.countDown latch))
 
 (defn- listen-until-interrupt [server app latch]
-  (loop []
-    (if (Thread/interrupted)
-      server
-      (do (open-latch latch)
-          (listen server app)
-          (recur)))))
+  (while (not (Thread/interrupted))
+      (open-latch latch)
+      (listen server app))
+  server)
 
 (defn serve
   ([server app] (serve server app (CountDownLatch. 0)))
