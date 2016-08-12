@@ -1,6 +1,7 @@
 (ns http-clj.mock
   (:require [http-clj.connection :as connection]
             [http-clj.server :as server]
+            [clojure.java.io :as io]
             [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
@@ -33,17 +34,21 @@
       (isClosed []
         @closed?))))
 
-(defrecord MockConnection [open]
+(defrecord MockConnection [open input]
   connection/Connection
-  (readline [conn] "")
+  (readline [conn]
+    (.readLine input))
 
   (write [conn output] conn)
 
   (close [conn]
     (assoc conn :open false)))
 
-(defn connection []
-  (MockConnection. true))
+(defn connection
+  ([]
+   (connection ""))
+  ([input]
+   (MockConnection. true (io/reader (.getBytes input)))))
 
 (defrecord MockServer [started stopped]
   component/Lifecycle
@@ -56,7 +61,7 @@
 
   server/AcceptingServer
   (accept [server]
-    (MockConnection. true)))
+    (connection)))
 
 (defn server []
   (MockServer. false false))
