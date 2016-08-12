@@ -4,11 +4,14 @@
             [http-clj.connection :as connection]
             [http-clj.server :refer [run]]))
 
+(defn hello-world [request]
+  (response/create request "Hello, world!"))
+
 (defn app [conn]
   (connection/write conn (-> (request/create conn)
-                         (response/create "Hello, world!")
-                         (response/compose)
-                         (:message))))
+                             (hello-world)
+                             (response/compose)
+                             (:message))))
 
 (defn -main [& args]
   (run app 5000))
