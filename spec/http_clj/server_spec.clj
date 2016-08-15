@@ -1,86 +1,62 @@
 (ns http-clj.server-spec
   (:require [speclj.core :refer :all]
-            [http-clj.server :refer [accept create]]
+            [http-clj.server :as s]
             [http-clj.connection :as connection]
             [http-clj.mock :as mock]
             [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayOutputStream))
 
-(def test-port 5000)
+(describe "a server component"
+  (it "can be created using a port"
+    (let [server (s/create 5001)]
+      (should-be-a java.net.ServerSocket (:server-socket server))
+      (component/stop server)))
 
-(def test-host "localhost")
+  (it "can be created by injecting a ServerSocket"
+    (let [server (s/create (mock/socket-server))]
+      (should-be-a java.net.ServerSocket (:server-socket server))))
 
-(defn start-server []
-  (doto (Thread. #(http-clj.server/run test-port))
-    (.start)))
+  (it "will close the server"
+    (let [server-socket (mock/socket-server)
+          server (s/create server-socket)]
+      (should= false (.isClosed server-socket))
+      (component/stop server)
+      (should= true (.isClosed server-socket))))
 
-(defn pass-through-blocking-listener []
-  (try
-    (-> (connection/create test-host test-port)
-        (connection/write "bye.\n")
-        (connection/close))
-    (catch java.net.ConnectException e nil)))
+  (it "will accept connections"
+    (should= true (satisfies? connection/Connection
+                              (-> (mock/socket-server)
+                                  (s/create)
+                                  (s/accept))))))
 
-(defn shutdown-server [thread]
-  (.interrupt thread)
-  (pass-through-blocking-listener))
+(defn test-app [conn]
+  (when (not (:open conn))
+    (should-fail "The connection should be open"))
+  (assoc conn :app-called true))
 
-(defn warmup []
-  (Thread/sleep 100))
+(describe "listen"
+  (with server (mock/server))
+  (it "opens and closes connection"
+    (should= false (:open (s/listen @server identity))))
 
-(describe "a server"
-  (context "as a component"
-    (it "can be created using a port"
-      (let [server (create 5001)]
-        (should-be-a java.net.ServerSocket (:server-socket server))
-        (component/stop server)))
+  (it "the application is sandwiched between opening and closing the connection"
+    (should= true (:app-called (s/listen @server test-app)))))
 
-    (it "can be created by injecting a ServerSocket"
-      (let [server (create (mock/server))]
-        (should-be-a java.net.ServerSocket (:server-socket server))))
+(defn interrupting-app [conn]
+  (loop [count 3]
+    (cond
+      (zero? count) (.interrupt (Thread/currentThread))
+      (neg? count) (should-fail "The loop should exit after interrupt")
+      :else (recur (dec count))))
+  conn)
 
-    (it "will close the server"
-      (let [server-socket (mock/server)
-            server (create server-socket)]
-        (should= false (.isClosed server-socket))
-        (component/stop server)
-        (should= true (.isClosed server-socket))))
+(describe "serve"
+  (with server (mock/server))
+  (it "starts the component"
+    (should= true (:started (s/serve @server interrupting-app))))
 
-    (it "will accept connections"
-      (should-be-a java.net.Socket
-                   (-> (mock/server)
-                       (create)
-                       (accept)))))
+  (it "listens until interrupted"
+    (s/serve @server interrupting-app))
 
-  (context "as an echo-server"
-    (around [it]
-      (let [thread (start-server)]
-        (warmup)
-        (it)
-        (shutdown-server thread)))
-
-    (it "echos back input and closes"
-      (let [client (connection/create test-host test-port)]
-        (connection/write client (str "foo" \newline
-                                      "bye." \newline))
-        (should= "foo" (connection/readline client))
-        (should= "Goodbye" (connection/readline client))
-        (connection/close client)))
-
-    (it "accepts connections in serial"
-      (let [client1 (connection/create test-host test-port)
-            client2 (connection/create test-host test-port)]
-        (connection/write client1 (str "foo" \newline
-                                       "bye." \newline))
-        (connection/write client2 (str "foo" \newline
-                                       "bar" \newline
-                                       "bye." \newline))
-
-        (should= "foo" (connection/readline client1))
-        (should= "Goodbye" (connection/readline client1))
-        (connection/close client1)
-
-        (should= "foo" (connection/readline client2))
-        (should= "bar" (connection/readline client2))
-        (should= "Goodbye" (connection/readline client2))
-        (connection/close client2)))))
+  (it "stops the component"
+    (should= true (:stopped (s/serve @server interrupting-app)))))
