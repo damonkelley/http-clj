@@ -6,6 +6,12 @@
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
+
+(def request-message (str "GET /path HTTP/1.1\r\n"
+                          "User-Agent: Test Request\r\n"
+                          "Host: www.example.com\r\n"
+                          "\r\n"))
+
 (defn socket [input output]
   (let [connected? (atom true)]
     (proxy [java.net.Socket] []
@@ -39,7 +45,8 @@
   (readline [conn]
     (.readLine input))
 
-  (write [conn output] conn)
+  (write [conn text]
+    (assoc conn :written-to-connection text))
 
   (close [conn]
     (assoc conn :open false)))
@@ -61,7 +68,7 @@
 
   server/AcceptingServer
   (accept [server]
-    (connection)))
+    (connection request-message)))
 
 (defn server []
   (MockServer. false false))
