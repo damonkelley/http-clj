@@ -9,8 +9,8 @@
 
 (defn parse-request-line [conn]
   (->> conn
-       (split-request-line)
-       (zipmap '(:method :path :version))))
+       split-request-line
+       (zipmap [:method :path :version])))
 
 (defn- parse-header [header]
   (let [[field-name field-value] (string/split header #":")]
@@ -32,5 +32,5 @@
 
 (defn create [conn]
   (-> {:conn conn}
-      (attach-request-line)
-      (attach-headers)))
+      attach-request-line
+      attach-headers))

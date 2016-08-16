@@ -5,17 +5,17 @@
 
 (defn request->response [conn app]
   (-> conn
-      (create)
-      (app)))
+      create
+      app))
 
 (defn write-response [resp]
   (->> resp
-      (response/compose)
-      (:message)
+      response/compose
+      :message
       (connection/write (:conn resp))))
 
 (defn http [conn app]
   (-> conn
       (request->response app)
-      (write-response)
-      (connection/close)))
+      write-response
+      connection/close))
