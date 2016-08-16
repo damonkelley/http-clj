@@ -1,14 +1,15 @@
 (ns http-clj.spec-helper.request-generator)
 
-(defn spread-headers [headers]
-  (reduce
-    (fn [string [key val]] (str string key ": " val "\r\n"))
-    ""
-    headers))
+(defn compose-header [header]
+  (let [[field-name field-value] header]
+    (str field-name ": " field-value "\r\n")))
+
+(defn compose-headers [headers]
+  (map compose-header headers))
 
 (defn request [method path headers body]
   (str method " " path " HTTP/1.1\r\n"
-       (spread-headers headers)
+       (apply str (compose-headers headers))
        "\r\n"
        body))
 
