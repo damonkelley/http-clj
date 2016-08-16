@@ -28,6 +28,7 @@
   (context "write-response"
     (it "writes the HTTP message to the connection"
       (let [conn (write-response {:body "Message body"
+                                  :status 200
                                   :conn (mock/connection)})]
         (should-contain "Message body" (:written-to-connection conn))
         (should-contain "HTTP/1.1 200 OK\r\n" (:written-to-connection conn)))))

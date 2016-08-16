@@ -28,4 +28,7 @@
     (client/get "http://localhost:5000"))
 
   (it "contains 'Hello, world!'"
-    (should= "Hello, world!\r\n", (:body (client/get "http://localhost:5000")))))
+    (should= "Hello, world!", (:body (client/get "http://localhost:5000"))))
+
+  (it "/foo is a valid path"
+    (should= "Bar", (:body (client/get "http://localhost:5000/foo")))))
