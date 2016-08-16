@@ -3,22 +3,20 @@
             [http-clj.spec-helper.mock :as mock]
             [http-clj.request :as request]
             [http-clj.response :as response]
+            [http-clj.spec-helper.request-generator :refer [GET]]
             [http-clj.lifecycle :refer [request->response
                                         write-response
                                         http]]))
-
-
-(def request-message (str "GET /path HTTP/1.1\r\n"
-                          "User-Agent: Test Request\r\n"
-                          "Host: www.example.com\r\n"
-                          "\r\n"))
 
 (defn test-app [request]
   (should= "GET" (:method request))
   (response/create request "Message body"))
 
 (describe "the connection lifecycle"
-  (with conn (mock/connection request-message))
+  (with conn
+    (-> (GET "/path" {"User-Agent" "Test Request" "Host" "www.example.com"})
+        (mock/connection)))
+
   (context "request->response"
     (it "it returns a response"
       (should= "Message body" (-> @conn
