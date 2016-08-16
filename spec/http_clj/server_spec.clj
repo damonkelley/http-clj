@@ -39,7 +39,12 @@
 (describe "listen"
   (with server (mock/server))
   (it "kicks off the request/response lifecycle"
-    (should-invoke lifecycle/http {:times 1} (s/listen @server test-app))))
+    (should-invoke lifecycle/http {:times 1 :return (mock/connection)}
+                   (s/listen @server test-app)))
+
+  (it "closes the connection"
+    (let [{open :open} (s/listen @server test-app)]
+      (should= false open))))
 
 (defn interrupting-app [request]
   (loop [count 3]

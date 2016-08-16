@@ -17,5 +17,4 @@
 (defn http [conn app]
   (-> conn
       (request->response app)
-      write-response
-      connection/close))
+      write-response))

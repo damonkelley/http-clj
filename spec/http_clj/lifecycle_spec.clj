@@ -35,5 +35,5 @@
     (it "pushes a request through an application"
       (should-contain "Message body" (:written-to-connection (http @conn test-app))))
 
-    (it "it closes the connection"
-      (should= false (:open (http @conn test-app))))))
+    (it "leaves the connection open"
+      (should= true (:open (http @conn test-app))))))

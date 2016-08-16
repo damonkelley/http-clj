@@ -31,8 +31,10 @@
   (map->Server {:server-socket server-socket}))
 
 (defn listen [server app]
-  (-> (accept server)
-      (lifecycle/http app)))
+  (-> server
+      accept
+      (lifecycle/http app)
+      connection/close))
 
 (defn- open-latch [latch]
   (.countDown latch))
