@@ -3,11 +3,6 @@
             [http-clj.response :as response]
             [http-clj.connection :as connection]))
 
-(defn request->response [conn app]
-  (-> conn
-      create
-      app))
-
 (defn write-response [resp]
   (->> resp
       response/compose
@@ -16,5 +11,6 @@
 
 (defn http [conn app]
   (-> conn
-      (request->response app)
+      create
+      app
       write-response))

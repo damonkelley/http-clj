@@ -4,8 +4,7 @@
             [http-clj.request :as request]
             [http-clj.response :as response]
             [http-clj.spec-helper.request-generator :refer [GET]]
-            [http-clj.lifecycle :refer [request->response
-                                        write-response
+            [http-clj.lifecycle :refer [write-response
                                         http]]))
 
 (defn test-app [request]
@@ -16,12 +15,6 @@
   (with conn
     (-> (GET "/path" {"User-Agent" "Test Request" "Host" "www.example.com"})
         (mock/connection)))
-
-  (context "request->response"
-    (it "it returns a response"
-      (should= "Message body" (-> @conn
-                                  (request->response test-app)
-                                  (:body)))))
 
   (context "write-response"
     (it "writes the HTTP message to the connection"
