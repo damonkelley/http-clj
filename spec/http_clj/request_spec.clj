@@ -1,7 +1,7 @@
 (ns http-clj.request-spec
   (:require [speclj.core :refer :all]
             [http-clj.request :as request]
-            [http-clj.mock :as mock]
+            [http-clj.spec-helper.mock :as mock]
             [clojure.java.io :as io]))
 
 (def get-request (str "GET /file1 HTTP/1.1\r\n"

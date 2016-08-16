@@ -4,7 +4,7 @@
             [http-clj.connection :as connection]
             [http-clj.response :as response]
             [http-clj.lifecycle :as lifecycle]
-            [http-clj.mock :as mock]
+            [http-clj.spec-helper.mock :as mock]
             [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayOutputStream))
 

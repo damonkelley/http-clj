@@ -1,7 +1,7 @@
 (ns http-clj.response-spec
   (:require [speclj.core :refer :all]
             [http-clj.response :refer [create compose]]
-            [http-clj.mock :refer [connection]]))
+            [http-clj.spec-helper.mock :refer [connection]]))
 
 (def request {:conn (connection)})
 

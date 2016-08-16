@@ -1,7 +1,6 @@
 (ns http-clj.application.hello-world-spec
   (:require [speclj.core :refer :all]
             [clj-http.client :as client]
-            [http-clj.mock :as mock]
             [http-clj.server :as s]
             [http-clj.application.hello-world :refer [app]])
   (:import java.util.concurrent.CountDownLatch))

@@ -1,6 +1,6 @@
 (ns http-clj.lifecycle-spec
   (:require [speclj.core :refer :all]
-            [http-clj.mock :as mock]
+            [http-clj.spec-helper.mock :as mock]
             [http-clj.request :as request]
             [http-clj.response :as response]
             [http-clj.lifecycle :refer [request->response

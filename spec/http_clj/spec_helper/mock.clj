@@ -1,4 +1,4 @@
-(ns http-clj.mock
+(ns http-clj.spec-helper.mock
   (:require [http-clj.connection :as connection]
             [http-clj.server :as server]
             [clojure.java.io :as io]
