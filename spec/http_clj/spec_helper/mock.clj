@@ -2,15 +2,10 @@
   (:require [http-clj.connection :as connection]
             [http-clj.server :as server]
             [clojure.java.io :as io]
-            [com.stuartsierra.component :as component])
+            [com.stuartsierra.component :as component]
+            [http-clj.spec-helper.request-generator :refer [GET]])
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
-
-
-(def request-message (str "GET /path HTTP/1.1\r\n"
-                          "User-Agent: Test Request\r\n"
-                          "Host: www.example.com\r\n"
-                          "\r\n"))
 
 (defn socket [input output]
   (let [connected? (atom true)]
@@ -68,7 +63,7 @@
 
   server/AcceptingServer
   (accept [server]
-    (connection request-message)))
+    (connection (GET "/" {"Host" "www.example.com"}))))
 
 (defn server []
   (MockServer. false false))

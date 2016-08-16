@@ -2,27 +2,24 @@
   (:require [speclj.core :refer :all]
             [http-clj.request :as request]
             [http-clj.spec-helper.mock :as mock]
+            [http-clj.spec-helper.request-generator :refer [POST GET]]
             [clojure.java.io :as io]))
 
-(def get-request (str "GET /file1 HTTP/1.1\r\n"
-                      "User-Agent: Test-request\r\n"
-                      "Host: www.example.com\r\n"
-                      "\r\n"))
-
-(def post-request (str "POST /file2 HTTP/1.0\r\n"
-                       "User-Agent: Test-request\r\n"
-                       "Host: www.example.us\r\n"
-                       "\r\n"
-                       "var=data"))
-
 (describe "request"
-  (with get-conn (mock/connection get-request))
-  (with post-conn (mock/connection post-request))
+  (with get-conn
+    (mock/connection
+      (GET "/file1"
+           {"Host" "www.example.com" "User-Agent" "Test-request"})))
+
+  (with post-conn
+    (mock/connection
+      (POST "/file2"
+            {"Host" "www.example.us" "User-Agent" "Test-request"}
+            "var=data")))
 
   (context "when created"
     (it "has the connection"
-      (let [conn (mock/connection get-request)]
-        (should= conn (:conn (request/create conn)))))
+      (should= @get-conn (:conn (request/create @get-conn))))
 
     (it "has the method"
       (should= "GET" (:method (request/create @get-conn)))
@@ -34,15 +31,15 @@
 
     (it "has the version"
       (should= "HTTP/1.1" (:version (request/create @get-conn)))
-      (should= "HTTP/1.0" (:version (request/create @post-conn))))
+      (should= "HTTP/1.1" (:version (request/create @post-conn))))
 
     (it "has headers"
-      (should= "www.example.com" (get-in
-                                   (request/create @get-conn)
-                                   [:headers "Host"]))
-      (should= "www.example.us" (get-in
-                                  (request/create @post-conn)
-                                  [:headers "Host"]))))
+      (should= "www.example.com"
+               (get-in (request/create @get-conn) [:headers "Host"]))
+
+      (should= "www.example.us"
+               (get-in (request/create @post-conn) [:headers "Host"]))))
+
   (context "parse-request-line"
     (it "parses the method"
       (should= "GET" (:method (request/parse-request-line @get-conn)))
@@ -54,7 +51,7 @@
 
     (it "parses the version"
       (should= "HTTP/1.1" (:version (request/parse-request-line @get-conn)))
-      (should= "HTTP/1.0" (:version (request/parse-request-line @post-conn)))))
+      (should= "HTTP/1.1" (:version (request/parse-request-line @post-conn)))))
 
   (context "parse-headers"
     (before (request/parse-request-line @get-conn))
