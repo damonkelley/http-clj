@@ -1,7 +1,7 @@
 (ns http-clj.connection-spec
   (:require [speclj.core :refer :all]
             [http-clj.connection :refer [write readline create close]]
-            [http-clj.spec-helper.mock :as mock])
+            [http-clj.mock :as mock])
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
