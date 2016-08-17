@@ -6,8 +6,11 @@
 
 (def request {:conn (connection)})
 
+(defn byte-array->string [array]
+  (String. array))
+
 (defn get-status-line [message]
-  (first (string/split message #"\r\n")))
+  (first (string/split (byte-array->string message) #"\r\n")))
 
 (describe "a response"
   (with request {:conn (connection)})
@@ -29,17 +32,21 @@
                           "\r\n"
                           "Hello, world!")]
         (should= expected (-> (create request "Hello, world!")
-                              (compose)
-                              (:message)))))
+                              compose
+                              :message
+                              byte-array->string))))
 
     (it "uses the body from the response"
       (should-contain "Message body" (-> (create request "Message body")
-                                         (compose)
-                                         (:message))))
+                                         compose
+                                         :message
+                                         byte-array->string)))
+
     (it "uses the status from the response"
       (should-contain "404" (-> (create request "" :status 404)
-                                (compose)
-                                (:message))))
+                                compose
+                                :message
+                                byte-array->string)))
 
     (it "has a status line for a GET request"
       (let [{message :message} (compose (create @request "" :status 200))]

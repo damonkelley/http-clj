@@ -41,7 +41,7 @@
     (.readLine input))
 
   (write [conn text]
-    (assoc conn :written-to-connection text))
+    (assoc conn :written-to-connection (String. text)))
 
   (close [conn]
     (assoc conn :open false)))
