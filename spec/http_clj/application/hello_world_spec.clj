@@ -1,7 +1,6 @@
 (ns http-clj.application.hello-world-spec
   (:require [speclj.core :refer :all]
             [clj-http.client :as client]
-            [http-clj.mock :as mock]
             [http-clj.server :as s]
             [http-clj.application.hello-world :refer [app]])
   (:import java.util.concurrent.CountDownLatch))
@@ -29,4 +28,7 @@
     (client/get "http://localhost:5000"))
 
   (it "contains 'Hello, world!'"
-    (should= "Hello, world!\r\n", (:body (client/get "http://localhost:5000")))))
+    (should= "Hello, world!", (:body (client/get "http://localhost:5000"))))
+
+  (it "/foo is a valid path"
+    (should= "Bar", (:body (client/get "http://localhost:5000/foo")))))

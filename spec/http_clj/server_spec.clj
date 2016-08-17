@@ -2,7 +2,9 @@
   (:require [speclj.core :refer :all]
             [http-clj.server :as s]
             [http-clj.connection :as connection]
-            [http-clj.mock :as mock]
+            [http-clj.response :as response]
+            [http-clj.lifecycle :as lifecycle]
+            [http-clj.spec-helper.mock :as mock]
             [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayOutputStream))
 
@@ -29,26 +31,28 @@
                                   (s/create)
                                   (s/accept))))))
 
-(defn test-app [conn]
-  (when (not (:open conn))
+(defn test-app [request]
+  (when (not (:open (:conn request)))
     (should-fail "The connection should be open"))
-  (assoc conn :app-called true))
+  (response/create request "App was called"))
 
 (describe "listen"
   (with server (mock/server))
-  (it "opens and closes connection"
-    (should= false (:open (s/listen @server identity))))
+  (it "kicks off the request/response lifecycle"
+    (should-invoke lifecycle/http {:times 1 :return (mock/connection)}
+                   (s/listen @server test-app)))
 
-  (it "the application is sandwiched between opening and closing the connection"
-    (should= true (:app-called (s/listen @server test-app)))))
+  (it "closes the connection"
+    (let [{open :open} (s/listen @server test-app)]
+      (should= false open))))
 
-(defn interrupting-app [conn]
+(defn interrupting-app [request]
   (loop [count 3]
     (cond
       (zero? count) (.interrupt (Thread/currentThread))
       (neg? count) (should-fail "The loop should exit after interrupt")
       :else (recur (dec count))))
-  conn)
+  (response/create request ""))
 
 (describe "serve"
   (with server (mock/server))

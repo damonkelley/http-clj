@@ -1,8 +1,9 @@
-(ns http-clj.mock
+(ns http-clj.spec-helper.mock
   (:require [http-clj.connection :as connection]
             [http-clj.server :as server]
             [clojure.java.io :as io]
-            [com.stuartsierra.component :as component])
+            [com.stuartsierra.component :as component]
+            [http-clj.spec-helper.request-generator :refer [GET]])
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
@@ -39,7 +40,8 @@
   (readline [conn]
     (.readLine input))
 
-  (write [conn output] conn)
+  (write [conn text]
+    (assoc conn :written-to-connection text))
 
   (close [conn]
     (assoc conn :open false)))
@@ -61,7 +63,7 @@
 
   server/AcceptingServer
   (accept [server]
-    (connection)))
+    (connection (GET "/" {"Host" "www.example.com"}))))
 
 (defn server []
   (MockServer. false false))

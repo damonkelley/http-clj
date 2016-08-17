@@ -1,6 +1,7 @@
 (ns http-clj.server
   (:require [com.stuartsierra.component :as component]
-            [http-clj.connection :as connection])
+            [http-clj.connection :as connection]
+            [http-clj.lifecycle :as lifecycle])
   (:import java.net.ServerSocket
            java.util.concurrent.CountDownLatch))
 
@@ -30,9 +31,10 @@
   (map->Server {:server-socket server-socket}))
 
 (defn listen [server app]
-  (-> (accept server)
-      (app)
-      (connection/close)))
+  (-> server
+      accept
+      (lifecycle/http app)
+      connection/close))
 
 (defn- open-latch [latch]
   (.countDown latch))
