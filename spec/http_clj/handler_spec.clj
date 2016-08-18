@@ -3,7 +3,7 @@
             [http-clj.handler :as handler]))
 
 (describe "file-handler"
-  (with test-path "/tmp/http-clj-test-file")
+  (with test-path "/tmp/http-clj-test-file-handler")
   (with test-data "Some content")
 
   (it "returns a handler"
