@@ -42,6 +42,12 @@
                                          :message
                                          byte-array->string)))
 
+    (it "uses the body from the response"
+      (should-contain "Message body" (-> (create request (.getBytes "Message body"))
+                                         compose
+                                         :message
+                                         byte-array->string)))
+
     (it "uses the status from the response"
       (should-contain "404" (-> (create request "" :status 404)
                                 compose
