@@ -34,6 +34,6 @@
       (should= 200 status)
       (should= "cob spec" body)))
 
-  (context "it can server images"
+  (context "it can serve images"
     (it "has /image.gif"
       (should= 200 (:status (GET "/image.gif"))))))
