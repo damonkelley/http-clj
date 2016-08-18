@@ -2,7 +2,6 @@
   (:require [speclj.core :refer :all]
             [http-clj.file :as file]))
 
-
 (describe "binary-slurp"
   (with test-path "/tmp/http-clj-test-file")
   (before (spit @test-path ""))
