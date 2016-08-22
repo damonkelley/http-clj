@@ -11,12 +11,10 @@
 
 (def root "http://localhost:5000")
 
-(defn new-latch []
-  (CountDownLatch. 1))
-
 (defn start-server [app port]
-  (let [latch (new-latch)
-        thread (Thread. #(s/serve (s/create port) app latch))]
+  (let [latch (CountDownLatch. 1)
+        application (app "resources/static/")
+        thread (Thread. #(s/serve (s/create port) application latch))]
     (.start thread)
     (.await latch)
     thread))
@@ -43,14 +41,15 @@
       (should= 200 (:status (GET "/image.gif"))))))
 
 (describe "fallback"
+  (with dir "resources/static/")
   (it "responds with a listing if directory"
-    (should-contain "image.gif" (:body (fallback {:path "/"}))))
+    (should-contain "image.gif" (:body (fallback {:path "/"} @dir))))
 
   (it "responds with a file if it is a file"
-    (should-contain "File contents" (String. (:body (fallback {:path "/file.txt"})))))
+    (should-contain "File contents" (String. (:body (fallback {:path "/file.txt"} @dir)))))
 
   (it "responds with 404 if a file is not found"
-    (should= 404 (:status (fallback {:path "/file-that-does-not-exist.txt"})))))
+    (should= 404 (:status (fallback {:path "/file-that-does-not-exist.txt"} @dir)))))
 
 (describe "file-helper"
   (it "takes two paths"
