@@ -16,10 +16,10 @@
     (should= "line 2" (readline @conn)))
 
   (it "will yield a connection when written to"
-   (should= @conn (write @conn "")))
+   (should= @conn (write @conn (.getBytes ""))))
 
   (it "can be written to"
-    (write @conn "data written to out")
+    (write @conn (.getBytes "data written to out"))
     (should= "data written to out" (.toString output)))
 
   (it "can be closed"

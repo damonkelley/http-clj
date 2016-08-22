@@ -23,12 +23,8 @@
     (assoc conn :socket nil)))
 
 (defn create
+  ([host port] (create (Socket. host port)))
   ([socket]
    (map->SocketConnection {:socket socket
                            :reader (io/reader socket)
-                           :writer (io/writer socket)}))
-  ([host port]
-   (let [socket (Socket. host port)]
-     (map->SocketConnection {:socket socket
-                             :reader (io/reader socket)
-                             :writer (io/writer socket)}))))
+                           :writer (.getOutputStream socket)})))
