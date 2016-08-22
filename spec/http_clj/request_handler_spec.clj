@@ -1,6 +1,6 @@
-(ns http-clj.handler-spec
+(ns http-clj.request-handler-spec
   (:require [speclj.core :refer :all]
-            [http-clj.handler :as handler]))
+            [http-clj.request-handler :as handler]))
 
 (describe "file-handler"
   (with test-path "/tmp/http-clj-test-file-handler")

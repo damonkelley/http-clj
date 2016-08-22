@@ -1,7 +1,7 @@
 (ns http-clj.application.cob-spec
   (:require [http-clj.router :refer [route]]
             [http-clj.response :as response]
-            [http-clj.handler :as handler]
+            [http-clj.request-handler :as handler]
             [http-clj.server :refer [run]]))
 
 (defn index [request]

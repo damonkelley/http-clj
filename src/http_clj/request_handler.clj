@@ -1,4 +1,4 @@
-(ns http-clj.handler
+(ns http-clj.request-handler
   (:require [http-clj.file :as f]
             [http-clj.response :as response]))
 
