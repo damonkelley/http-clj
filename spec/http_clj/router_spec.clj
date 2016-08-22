@@ -19,11 +19,9 @@
   (it "responds with not found there is no matching route"
     (let [{status :status body :body} (router/route
                                         {:method "GET" :path "/"} @routes)]
-      (should= 404 status)
-      (should-contain "Route not found" body)))
+      (should= 404 status)))
 
   (it "will not find the handler if the path matches but the method does not"
     (let [{status :status body :body} (router/route
                                         {:method "GET" :path "/b"} @routes)]
-      (should= 404 status)
-      (should-contain "Route not found" body))))
+      (should= 404 status))))
