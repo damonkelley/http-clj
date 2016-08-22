@@ -2,6 +2,8 @@
   (:require [speclj.core :refer :all]
             [http-clj.router :as router]))
 
+(defn fallback [request])
+
 (describe "a router"
   (with-stubs)
   (with routes {["GET" "/a"] (stub :handler-a)
@@ -16,7 +18,7 @@
     (should-not-have-invoked :handler-a)
     (should-have-invoked :handler-b {:times 1}))
 
-  (it "responds with not found there is no matching route"
+  (it "responds with not found if there is no matching route"
     (let [{status :status body :body} (router/route
                                         {:method "GET" :path "/"} @routes)]
       (should= 404 status)))
@@ -24,4 +26,8 @@
   (it "will not find the handler if the path matches but the method does not"
     (let [{status :status body :body} (router/route
                                         {:method "GET" :path "/b"} @routes)]
-      (should= 404 status))))
+      (should= 404 status)))
+
+  (it "can be provided with an alternate fallback handler"
+    (should-invoke fallback {:times 1}
+                         (router/route {:method "GET" :path "/c"} @routes :fallback fallback ))))
