@@ -2,16 +2,12 @@
   (:require [http-clj.router :refer [route]]
             [http-clj.request-handler :as handler]
             [http-clj.server :refer [run]]
+            [http-clj.file :as file-helper]
             [clojure.java.io :as io]
-            [clojure.tools.cli :refer [parse-opts]])
-  (:import java.nio.file.Paths))
-
-(defn file-helper [root-directory child-path]
-  (-> (Paths/get root-directory (into-array [child-path]))
-      .toFile))
+            [clojure.tools.cli :refer [parse-opts]]))
 
 (defn fallback [request directory]
-  (let [file (file-helper directory (:path request))]
+  (let [file (file-helper/resolve directory (:path request))]
     (cond (.isDirectory file) (handler/directory request file)
           (.exists file) (handler/file request file)
           :else (handler/not-found request))))
@@ -34,8 +30,7 @@
     :validate [#(.isDirectory (io/file %)) "Must be a valid directory"]]])
 
 (defn cli [args]
-  (-> args
-      (parse-opts cli-options)))
+  (parse-opts args cli-options))
 
 (defn -main [& args]
   (let [{options :options} (cli args)]

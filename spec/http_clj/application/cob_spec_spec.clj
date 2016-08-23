@@ -67,11 +67,3 @@
 
   (it "responds with 404 if a file is not found"
     (should= 404 (:status (fallback {:path "/file-that-does-not-exist.txt"} @dir)))))
-
-(describe "file-helper"
-  (it "takes two paths"
-    (file-helper "resources/static" "image.gif"))
-  (it "it forms the path correctly"
-    (should= "resources/static/image.gif" (.getPath (file-helper "resources/static/" "/image.gif"))))
-  (it "returns a file at the requsted path"
-    (should= "resources/static/image.gif" (.getPath (file-helper "resources/static" "image.gif")))))
