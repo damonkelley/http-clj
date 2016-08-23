@@ -8,10 +8,13 @@
     (with file (io/file "file"))
     (it "has the href to the file"
       (should= "/file" (:href (presenter/file {:path "/"} @file))))
+
     (it "uses the path in the request to construct the href"
       (should= "/path/to/file" (:href (presenter/file {:path "/path/to"} @file))))
+
     (it "can construct the href to a file with a relative path"
       (should= "/path/to/file" (:href (presenter/file {:path "/path/to/"} (io/file "../relative/to/file")))))
+
     (it "has the name of the file"
       (should= "file" (:name (presenter/file {:path "/"} @file)))))
 

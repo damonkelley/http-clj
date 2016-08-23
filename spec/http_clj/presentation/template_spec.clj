@@ -5,7 +5,6 @@
             [hiccup.core :refer [html]]
             [clojure.java.io :as io]))
 
-
 (describe "template"
   (context "directory"
     (with file-a (io/file "file-a"))

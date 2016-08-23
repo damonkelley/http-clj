@@ -30,4 +30,4 @@
 
   (it "can be provided with an alternate fallback handler"
     (should-invoke fallback {:times 1}
-                         (router/route {:method "GET" :path "/c"} @routes :fallback fallback ))))
+                   (router/route {:method "GET" :path "/c"} @routes :fallback fallback))))
