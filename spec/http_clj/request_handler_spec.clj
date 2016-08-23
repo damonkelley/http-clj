@@ -9,8 +9,10 @@
 (defn mock-directory
   ([] (mock-directory "some-path"))
   ([path] (proxy [File] [path]
-            (list []
-              (into-array ["file-a" "file-b" "subdirectory"]))
+            (listFiles []
+              (into-array [(io/file "file-a")
+                           (io/file "file-b")
+                           (io/file "subdirectory")]))
             (isDirectory []
               true))))
 
@@ -18,14 +20,19 @@
   (context "directory"
     (it "has a text/html content type"
       (should= "text/html"
-               (get-in (handler/directory {} (mock-directory)) [:headers "Content-Type"])))
+               (get-in (handler/directory {:path "/"} (mock-directory)) [:headers "Content-Type"])))
 
     (it "lists the contents of the directory"
       (let [contents ["file-a" "file-b" "subdirectory"]
-            {body :body} (handler/directory {} (mock-directory))]
-        (should-contain (html [:a {:href "file-a"} "file-a"]) body)
-        (should-contain (html [:a {:href "file-b"} "file-b"]) body)
-        (should-contain (html [:a {:href "subdirectory"} "subdirectory"]) body))))
+            {body :body} (handler/directory {:path "/"} (mock-directory))]
+        (should-contain (html [:a {:href "/file-a"} "file-a"]) body)
+        (should-contain (html [:a {:href "/file-b"} "file-b"]) body)
+        (should-contain (html [:a {:href "/subdirectory"} "subdirectory"]) body))))
+
+    (it "paths to the files are relative to the request path"
+      (let [contents ["file-a" "file-b" "subdirectory"]
+            {body :body} (handler/directory {:path "/dir"} (mock-directory))]
+        (should-contain (html [:a {:href "/dir/file-a"} "file-a"]) body)))
 
   (context "not-found"
     (it "responds with status code 404"

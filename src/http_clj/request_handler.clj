@@ -1,19 +1,13 @@
 (ns http-clj.request-handler
   (:require [http-clj.file :as f]
             [http-clj.response :as response]
-            [clojure.java.io :as io]
-            [hiccup.core :refer [html]]))
-
-(defn- directory-template [contents]
-  (html
-    [:ul (for [file contents]
-       [:li [:a {:href file} file]])]))
+            [http-clj.presentation.template :as template]
+            [http-clj.presentation.presenter :as presenter]))
 
 (defn directory [request dir]
-  (response/create
-    request
-    (directory-template (.list dir))
-    :headers {"Content-Type" "text/html"}))
+  (let [files (presenter/files request (.listFiles dir))
+        html (template/directory files)]
+  (response/create request html :headers {"Content-Type" "text/html"})))
 
 (defn not-found [request]
   (response/create request "Not Found" :status 404))
