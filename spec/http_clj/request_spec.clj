@@ -6,14 +6,12 @@
             [http-clj.logging :as logging]
             [clojure.java.io :as io]))
 
-
 (def test-log (atom []))
 
 (defrecord TestLogger []
   logging/Logger
   (log [this contents]
     (swap! test-log #(conj % contents))))
-
 
 (describe "request"
   (with get-conn

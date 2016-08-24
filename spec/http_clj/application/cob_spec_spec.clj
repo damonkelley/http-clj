@@ -37,4 +37,7 @@
       (should-contain "image.gif" body)))
 
     (it "has /image.gif"
-      (should= 200 (:status (GET "/image.gif")))))
+      (should= 200 (:status (GET "/image.gif"))))
+
+    (it "has a viewable log"
+      (should-contain "GET /log HTTP/1.1" (:body (GET "/log")))))
