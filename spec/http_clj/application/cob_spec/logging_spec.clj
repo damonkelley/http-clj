@@ -1,0 +1,22 @@
+(ns http-clj.application.cob-spec.logging-spec
+  (:require [speclj.core :refer :all]
+            [http-clj.application.cob-spec.logging :as logger]
+            [http-clj.logging :as logging]
+            [taoensso.timbre :as timbre]
+            [taoensso.timbre.appenders.core :as appenders]
+            [clojure.java.io :as io])
+  (:import java.io.ByteArrayOutputStream))
+
+(describe "cob-spec logger"
+  (with output (ByteArrayOutputStream.))
+
+  (with test-config
+    {:level :debug
+     :appenders {:println (appenders/println-appender {:stream (io/writer @output)})}})
+
+  (it "creates a logger"
+    (should= true (satisfies? logging/Logger (logger/create @test-config))))
+
+  (it "logs the contents"
+    (logging/log (logger/create @test-config) "message")
+    (should-contain "message" (.toString @output))))
