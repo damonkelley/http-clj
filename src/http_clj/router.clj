@@ -1,10 +1,9 @@
 (ns http-clj.router
-  (:require [http-clj.response :as response]))
+  (:require [http-clj.response :as response]
+            [http-clj.request-handler :as handler]))
 
-(defn- route-not-found [request]
-  (response/create request "Route not found" :status 404))
-
-(defn route [request routes]
+(defn route [request routes & {:keys [fallback]
+                               :or {fallback handler/not-found}}]
   (let [{method :method path :path} request
-        handler (get routes [method path] route-not-found)]
+        handler (get routes [method path] fallback)]
     (handler request)))

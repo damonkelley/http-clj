@@ -22,18 +22,34 @@
       (should= 200 (:status (create @request "Body")))
       (should= 404 (:status (create @request "Body" :status 404))))
 
+    (it "has default headers"
+      (should= {} (:headers (create @request ""))))
+
+    (it "can be provided with headers"
+      (let [{headers :headers} (create @request "" :headers {"Content-Type" "text/html"})]
+        (should= {"Content-Type" "text/html"} headers)))
+
     (it "has the connection"
       (should= (:conn @request) (:conn (create @request "")))))
 
   (context "when composed"
     (it "is a valid HTTP response"
-      (let [response (create @request "Hello, world!")
+      (let [headers {"Accept" "*" "Host" "www.example.com"}
+            response (create @request "Hello, world!" :headers headers)
             {message :message} (compose response)]
-        (should=
-          (str "HTTP/1.1 200 OK\r\n"
-               "\r\n"
-               "Hello, world!")
-          (byte-array->string message))))
+        (should= (str "HTTP/1.1 200 OK\r\n"
+                      "Accept: *\r\n"
+                      "Host: www.example.com\r\n"
+                      "\r\n"
+                      "Hello, world!")
+                 (byte-array->string message))))
+
+    (it "formats the headers"
+      (let [headers {"Host" "www.example.com" "Content-Type" "application/json"}
+            response (create @request "Message body" :headers headers)
+            {message :message} (compose response)]
+        (should-contain "Host: www.example.com\r\n" (byte-array->string message))
+        (should-contain "Content-Type: application/json" (byte-array->string message))))
 
     (it "uses the body from the response"
       (let [response (create @request "Message body")
