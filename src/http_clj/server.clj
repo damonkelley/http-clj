@@ -19,7 +19,9 @@
 
   AcceptingServer
   (accept [component]
-    (connection/create (.accept server-socket))))
+    (-> server-socket
+        .accept
+        connection/create)))
 
 (defmulti create type)
 (defmethod create Number
