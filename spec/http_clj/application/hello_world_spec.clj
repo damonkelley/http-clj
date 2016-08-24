@@ -9,7 +9,7 @@
   (CountDownLatch. 1))
 
 (defn start-server [app port latch]
-  (doto (Thread. #(s/serve (s/create port) app latch))
+  (doto (Thread. #(s/serve (s/create port) {:entrypoint app} latch))
     (.start)))
 
 (defn shutdown-server

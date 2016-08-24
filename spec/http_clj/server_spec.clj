@@ -38,12 +38,13 @@
 
 (describe "listen"
   (with server (mock/server))
+  (with application {:entrypoint test-app})
   (it "kicks off the request/response lifecycle"
     (should-invoke lifecycle/http {:times 1 :return (mock/connection)}
-                   (s/listen @server test-app)))
+                   (s/listen @server @application)))
 
   (it "closes the connection"
-    (let [{open :open} (s/listen @server test-app)]
+    (let [{open :open} (s/listen @server @application)]
       (should= false open))))
 
 (defn interrupting-app [request]
@@ -56,11 +57,12 @@
 
 (describe "serve"
   (with server (mock/server))
+  (with application {:entrypoint interrupting-app})
   (it "starts the component"
-    (should= true (:started (s/serve @server interrupting-app))))
+    (should= true (:started (s/serve @server @application))))
 
   (it "listens until interrupted"
-    (s/serve @server interrupting-app))
+    (s/serve @server @application))
 
   (it "stops the component"
-    (should= true (:stopped (s/serve @server interrupting-app)))))
+    (should= true (:stopped (s/serve @server @application)))))

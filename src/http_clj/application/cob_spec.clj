@@ -17,7 +17,7 @@
          :fallback #(fallback % directory)))
 
 (defn app [directory]
-  #(cob-spec % directory))
+  {:entrypoint #(cob-spec % directory)})
 
 (def cli-options
   [["-p" "--port PORT" "Port number"

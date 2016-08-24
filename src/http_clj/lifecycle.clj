@@ -9,8 +9,8 @@
       :message
       (connection/write (:conn resp))))
 
-(defn http [conn app]
-  (-> conn
-      create
-      app
-      write-response))
+(defn http [conn {:keys [entrypoint] :as app}]
+    (-> conn
+        create
+        entrypoint
+        write-response))

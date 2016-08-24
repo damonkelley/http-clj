@@ -16,4 +16,4 @@
      ["GET" "/foo"] foo}))
 
 (defn -main [& args]
-  (run app 5000))
+  (run {:entrypoint app} 5000))

@@ -15,6 +15,7 @@
   (with conn
     (-> (GET "/path" {"User-Agent" "Test Request" "Host" "www.example.com"})
         (mock/connection)))
+  (with application {:entrypoint test-app})
 
   (context "write-response"
     (it "writes the HTTP message to the connection"
@@ -26,7 +27,7 @@
 
   (context "http"
     (it "pushes a request through an application"
-      (should-contain "Message body" (:written-to-connection (http @conn test-app))))
+      (should-contain "Message body" (:written-to-connection (http @conn @application))))
 
     (it "leaves the connection open"
-      (should= true (:open (http @conn test-app))))))
+      (should= true (:open (http @conn @application))))))
