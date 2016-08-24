@@ -3,7 +3,17 @@
             [http-clj.request :as request]
             [http-clj.spec-helper.mock :as mock]
             [http-clj.spec-helper.request-generator :refer [POST GET]]
+            [http-clj.logging :as logging]
             [clojure.java.io :as io]))
+
+
+(def test-log (atom []))
+
+(defrecord TestLogger []
+  logging/Logger
+  (log [this contents]
+    (swap! test-log #(conj % contents))))
+
 
 (describe "request"
   (with get-conn
@@ -38,7 +48,11 @@
                (get-in (request/create @get-conn) [:headers "Host"]))
 
       (should= "www.example.us"
-               (get-in (request/create @post-conn) [:headers "Host"]))))
+               (get-in (request/create @post-conn) [:headers "Host"])))
+
+    (it "logs the request"
+      (request/create @get-conn (->TestLogger))
+      (should-contain "GET /file1 HTTP/1.1" @test-log)))
 
   (context "parse-request-line"
     (it "parses the method"

@@ -1,5 +1,6 @@
 (ns http-clj.request
   (:require [http-clj.connection :as connection]
+            [http-clj.logging :as logging]
             [clojure.string :as string]))
 
 (defn- split-request-line [conn]
@@ -30,7 +31,18 @@
 (defn- attach-headers [request]
   (assoc request :headers (parse-headers (:conn request))))
 
-(defn create [conn]
-  (-> {:conn conn}
-      attach-request-line
-      attach-headers))
+(defn- log-request [{:keys [method path version logger] :as request}]
+  (logging/log logger (str method " " path " " version))
+  request)
+
+(defrecord DegenerateLogger []
+  logging/Logger
+  (log [this contents]))
+
+(defn create
+  ([conn] (create conn (->DegenerateLogger)))
+  ([conn logger]
+   (-> {:conn conn :logger logger}
+       attach-request-line
+       attach-headers
+       log-request)))
