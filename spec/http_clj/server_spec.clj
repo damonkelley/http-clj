@@ -5,6 +5,7 @@
             [http-clj.response :as response]
             [http-clj.lifecycle :as lifecycle]
             [http-clj.spec-helper.mock :as mock]
+            [http-clj.logging :as logging]
             [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayOutputStream))
 
@@ -31,6 +32,10 @@
                                   (s/create)
                                   (s/accept))))))
 
+(defrecord DegenerateLogger []
+  logging/Logger
+  (log [this contents]))
+
 (defn test-app [request]
   (when (not (:open (:conn request)))
     (should-fail "The connection should be open"))
@@ -38,7 +43,8 @@
 
 (describe "listen"
   (with server (mock/server))
-  (with application {:entrypoint test-app})
+  (with application {:entrypoint test-app
+                     :logger (->DegenerateLogger)})
   (it "kicks off the request/response lifecycle"
     (should-invoke lifecycle/http {:times 1 :return (mock/connection)}
                    (s/listen @server @application)))
@@ -57,7 +63,8 @@
 
 (describe "serve"
   (with server (mock/server))
-  (with application {:entrypoint interrupting-app})
+  (with application {:entrypoint interrupting-app
+                     :logger (->DegenerateLogger)})
   (it "starts the component"
     (should= true (:started (s/serve @server @application))))
 

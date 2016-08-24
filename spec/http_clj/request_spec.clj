@@ -48,11 +48,7 @@
                (get-in (request/create @get-conn) [:headers "Host"]))
 
       (should= "www.example.us"
-               (get-in (request/create @post-conn) [:headers "Host"])))
-
-    (it "logs the request"
-      (request/create @get-conn (->TestLogger))
-      (should-contain "GET /file1 HTTP/1.1" @test-log)))
+               (get-in (request/create @post-conn) [:headers "Host"]))))
 
   (context "parse-request-line"
     (it "parses the method"

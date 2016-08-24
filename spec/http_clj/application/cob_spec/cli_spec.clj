@@ -19,5 +19,3 @@
 
   (it "verifies the directory exists"
     (should-contain "Must be a valid directory" (first (:errors (cli ["-ddoes-not-exist"]))))))
-
-

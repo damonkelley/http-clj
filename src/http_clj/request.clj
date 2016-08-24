@@ -31,18 +31,7 @@
 (defn- attach-headers [request]
   (assoc request :headers (parse-headers (:conn request))))
 
-(defn- log-request [{:keys [method path version logger] :as request}]
-  (logging/log logger (str method " " path " " version))
-  request)
-
-(defrecord DegenerateLogger []
-  logging/Logger
-  (log [this contents]))
-
-(defn create
-  ([conn] (create conn (->DegenerateLogger)))
-  ([conn logger]
-   (-> {:conn conn :logger logger}
+(defn create [conn]
+   (-> {:conn conn}
        attach-request-line
-       attach-headers
-       log-request)))
+       attach-headers))
