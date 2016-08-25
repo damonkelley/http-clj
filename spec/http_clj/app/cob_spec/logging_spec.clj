@@ -19,12 +19,11 @@
 
   (it "logs the contents"
     (logging/log (logger/create @test-config) :info "message")
-    (should-contain "message" (.toString @output)))
+    (should-contain "[INFO] message" (.toString @output)))
 
   (it "has a default configuration"
     (let [log-file "resources/log/log.txt"]
       (spit log-file "")
       (should-be empty? (slurp log-file))
       (logging/log (logger/create) :debug "message")
-      (should-contain "message" (slurp log-file))
-      (should-contain "DEBUG" (slurp log-file)))))
+      (should= "[DEBUG] message\n" (slurp log-file)))))
