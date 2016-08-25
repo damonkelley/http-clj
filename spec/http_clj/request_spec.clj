@@ -2,16 +2,7 @@
   (:require [speclj.core :refer :all]
             [http-clj.request :as request]
             [http-clj.spec-helper.mock :as mock]
-            [http-clj.spec-helper.request-generator :refer [POST GET]]
-            [http-clj.logging :as logging]
-            [clojure.java.io :as io]))
-
-(def test-log (atom []))
-
-(defrecord TestLogger []
-  logging/Logger
-  (log [this contents]
-    (swap! test-log #(conj % contents))))
+            [http-clj.spec-helper.request-generator :refer [POST GET]]))
 
 (describe "request"
   (with get-conn
