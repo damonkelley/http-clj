@@ -10,17 +10,13 @@
       :message
       (connection/write (:conn resp))))
 
-(defn- log-request [{:keys [method path version logger] :as request}]
-  (logging/log logger (str method " " path " " version))
+(defn- log-request [{:keys [method path version] :as request} logger]
+  (logging/log logger :info (str method " " path " " version))
   request)
 
-(defn- attach-logger [request logger]
-  (assoc request :logger logger))
-
-(defn http [conn {:keys [entrypoint logger] :as app}]
+(defn http [conn {:keys [entrypoint logger]}]
     (-> conn
         create
-        (attach-logger logger)
-        log-request
+        (log-request logger)
         entrypoint
         write-response))

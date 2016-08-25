@@ -5,8 +5,8 @@
 
 (defrecord CobSpecLogger [config]
   logging/Logger
-  (log [this contents]
-      (timbre/log* config :info contents)))
+  (log [this level contents]
+      (timbre/log* config level contents)))
 
 (def default-config
   {:level :debug

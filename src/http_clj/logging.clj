@@ -1,4 +1,4 @@
 (ns http-clj.logging)
 
 (defprotocol Logger
-  (log [this message]))
+  (log [this level message]))

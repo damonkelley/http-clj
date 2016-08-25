@@ -34,7 +34,7 @@
 
 (defrecord DegenerateLogger []
   logging/Logger
-  (log [this contents]))
+  (log [this level contents]))
 
 (defn test-app [request]
   (when (not (:open (:conn request)))

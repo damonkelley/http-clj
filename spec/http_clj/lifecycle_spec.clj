@@ -12,7 +12,7 @@
 
 (defrecord TestLogger []
   logging/Logger
-  (log [this contents]
+  (log [this level contents]
     (swap! test-log #(conj % contents))))
 
 (defn test-app [request]
