@@ -1,4 +1,4 @@
-(ns http-clj.application.cob-spec.cli
+(ns http-clj.app.cob-spec.cli
   (:require [clojure.java.io :as io]
             [clojure.tools.cli :refer [parse-opts]]))
 

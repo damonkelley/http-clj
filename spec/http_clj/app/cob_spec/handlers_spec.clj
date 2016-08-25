@@ -1,6 +1,6 @@
-(ns http-clj.application.cob-spec.handlers-spec
+(ns http-clj.app.cob-spec.handlers-spec
   (:require [speclj.core :refer :all]
-            [http-clj.application.cob-spec.handlers :refer :all]
+            [http-clj.app.cob-spec.handlers :refer :all]
             [clojure.java.io :as io])
   (:import java.io.ByteArrayOutputStream))
 

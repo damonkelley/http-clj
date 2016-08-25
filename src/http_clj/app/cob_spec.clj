@@ -1,9 +1,9 @@
-(ns http-clj.application.cob-spec
+(ns http-clj.app.cob-spec
   (:require [http-clj.router :refer [route]]
             [http-clj.server :refer [run]]
-            [http-clj.application.cob-spec.handlers :as handlers]
-            [http-clj.application.cob-spec.cli :as cli]
-            [http-clj.application.cob-spec.logging :as logger]
+            [http-clj.app.cob-spec.handlers :as handlers]
+            [http-clj.app.cob-spec.cli :as cli]
+            [http-clj.app.cob-spec.logging :as logger]
             [clojure.java.io :as io]
             [taoensso.timbre.appenders.core :as appenders])
   (:import java.io.ByteArrayOutputStream))

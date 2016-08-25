@@ -1,6 +1,6 @@
-(ns http-clj.application.cob-spec.cli-spec
+(ns http-clj.app.cob-spec.cli-spec
   (:require [speclj.core :refer :all]
-            [http-clj.application.cob-spec.cli :refer :all]
+            [http-clj.app.cob-spec.cli :refer :all]
             [clojure.java.io :as io]))
 
 (describe "cli"

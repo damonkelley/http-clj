@@ -1,10 +1,10 @@
-(ns http-clj.application.cob-spec-spec
+(ns http-clj.app.cob-spec-spec
   (:require [speclj.core :refer :all]
             [clj-http.client :as client]
             [http-clj.server :as s]
             [http-clj.file :as file]
             [http-clj.request-handler :as handler]
-            [http-clj.application.cob-spec :refer :all]
+            [http-clj.app.cob-spec :refer :all]
             [clojure.java.io :as io])
   (:import java.util.concurrent.CountDownLatch
            java.io.File))

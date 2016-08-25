@@ -1,6 +1,6 @@
-(ns http-clj.application.cob-spec.logging-spec
+(ns http-clj.app.cob-spec.logging-spec
   (:require [speclj.core :refer :all]
-            [http-clj.application.cob-spec.logging :as logger]
+            [http-clj.app.cob-spec.logging :as logger]
             [http-clj.logging :as logging]
             [taoensso.timbre :as timbre]
             [taoensso.timbre.appenders.core :as appenders]

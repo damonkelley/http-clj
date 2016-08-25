@@ -1,4 +1,4 @@
-(ns http-clj.application.cob-spec.handlers
+(ns http-clj.app.cob-spec.handlers
   (:require [http-clj.request-handler :as handler]
             [http-clj.file :as file-helper]
             [http-clj.response :as response]))
