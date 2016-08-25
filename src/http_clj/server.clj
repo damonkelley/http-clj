@@ -40,15 +40,11 @@
         .accept
         connection/create)))
 
-(defn create [& {:keys [port server-socket latch application]
-                 :or {port 5000
-                      server-socket #(ServerSocket. %)
-                      latch (CountDownLatch. 0)
-                      application identity}}]
-  (map->ConnectionServer
-    {:server-socket (server-socket port)
-     :application application
-     :latch latch}))
+(defn create [application & {:keys [port server-socket latch]
+                             :or {port 5000
+                                  server-socket #(ServerSocket. %)
+                                  latch (CountDownLatch. 0)}}]
+  (->ConnectionServer (server-socket port) application latch))
 
 (defn serve [server]
   (-> server
@@ -56,4 +52,4 @@
       (component/stop)))
 
 (defn run [app port]
-  (serve (create :port port :application app)))
+  (serve (create app :port port)))

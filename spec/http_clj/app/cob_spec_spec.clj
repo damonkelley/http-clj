@@ -12,8 +12,8 @@
 
 (defn start-server [app port]
   (let [latch (CountDownLatch. 1)
-        server #(s/serve (s/create :port port
-                                   :application (app "resources/static/")
+        server #(s/serve (s/create (app "resources/static/")
+                                   :port port
                                    :latch latch))
         thread (Thread. server)]
     (.start thread)

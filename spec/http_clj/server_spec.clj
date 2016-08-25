@@ -10,25 +10,26 @@
   (:import java.io.ByteArrayOutputStream))
 
 (describe "a server component"
+  (with application {:entrypoint identity})
   (it "can be created using a port"
-    (let [server (s/create :port 5001)]
+    (let [server (s/create @application :port 5001)]
       (should-be-a java.net.ServerSocket (:server-socket server))
       (component/stop server)))
 
   (it "can be created by injecting a ServerSocket"
-    (let [server (s/create :server-socket mock/socket-server)]
+    (let [server (s/create @application :server-socket mock/socket-server)]
       (should-be-a java.net.ServerSocket (:server-socket server))))
 
   (it "will close the server"
     (let [server-socket (mock/socket-server)
-          server (s/create :server-socket mock/socket-server)]
+          server (s/create @application :server-socket mock/socket-server)]
       (should= false (.isClosed (:server-socket server)))
       (component/stop server)
       (should= true (.isClosed (:server-socket server)))))
 
   (it "will accept connections"
     (should= true (satisfies? connection/Connection
-                              (-> (s/create :server-socket mock/socket-server)
+                              (-> (s/create @application :server-socket mock/socket-server)
                                   (s/accept))))))
 
 (defrecord DegenerateLogger []
