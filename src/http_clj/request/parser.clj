@@ -7,8 +7,8 @@
       (connection/readline)
       (string/split #" ")))
 
-(defn request-line [conn]
-  (->> conn
+(defn request-line [request]
+  (->> (:conn request)
        split-request-line
        (zipmap [:method :path :version])))
 
@@ -17,8 +17,8 @@
     {(string/trim field-name)
      (string/trim field-value)}))
 
-(defn headers [conn]
-  (loop [conn conn headers {}]
+(defn headers [request]
+  (loop [conn (:conn request) headers {}]
     (let [header (connection/readline conn)]
       (if (empty? header)
         headers

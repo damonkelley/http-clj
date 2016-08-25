@@ -5,10 +5,10 @@
             [http-clj.request.parser :as parser]))
 
 (defn- attach-request-line [request]
-  (merge request (parser/request-line (:conn request))))
+  (merge request (parser/request-line request)))
 
 (defn- attach-headers [request]
-  (assoc request :headers (parser/headers (:conn request))))
+  (assoc request :headers (parser/headers request)))
 
 (defn create [conn]
    (-> {:conn conn}
