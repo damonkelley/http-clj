@@ -1,36 +1,13 @@
 (ns http-clj.server
   (:require [com.stuartsierra.component :as component]
             [http-clj.connection :as connection]
-            [http-clj.lifecycle :as lifecycle])
+            [http-clj.lifecycle :as lifecycle]
+            [http-clj.logging :as logging])
   (:import java.net.ServerSocket
            java.util.concurrent.CountDownLatch))
 
-(defprotocol AcceptingServer
+(defprotocol Server
   (accept [component]))
-
-(defrecord Server [server-socket]
-  component/Lifecycle
-  (start [component]
-    component)
-
-  (stop [component]
-    (.close server-socket)
-    component)
-
-  AcceptingServer
-  (accept [component]
-    (-> server-socket
-        .accept
-        connection/create)))
-
-(defmulti create type)
-(defmethod create Number
-  [port]
-  (map->Server {:server-socket (ServerSocket. port)}))
-
-(defmethod create ServerSocket
-  [server-socket]
-  (map->Server {:server-socket server-socket}))
 
 (defn listen [server app]
   (-> server
@@ -43,16 +20,40 @@
 
 (defn- listen-until-interrupt [server app latch]
   (while (not (Thread/interrupted))
-      (open-latch latch)
-      (listen server app))
+    (open-latch latch)
+    (listen server app))
   server)
 
-(defn serve
-  ([server app] (serve server app (CountDownLatch. 0)))
-  ([server app latch] (-> server
-                          (component/start)
-                          (listen-until-interrupt app latch)
-                          (component/stop))))
+(defrecord ConnectionServer [server-socket application latch]
+  component/Lifecycle
+  (start [server]
+    (listen-until-interrupt server application latch)
+    server)
+
+  (stop [component]
+    (.close server-socket)
+    component)
+
+  Server
+  (accept [component]
+    (-> server-socket
+        .accept
+        connection/create)))
+
+(defn create [& {:keys [port server-socket latch application]
+                 :or {port 5000
+                      server-socket #(ServerSocket. %)
+                      latch (CountDownLatch. 0)
+                      application identity}}]
+  (map->ConnectionServer
+    {:server-socket (server-socket port)
+     :application application
+     :latch latch}))
+
+(defn serve [server]
+  (-> server
+      (component/start)
+      (component/stop)))
 
 (defn run [app port]
-  (serve (create port) app))
+  (serve (create :port port :application app)))
