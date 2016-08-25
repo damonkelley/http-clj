@@ -1,5 +1,4 @@
-(ns http-clj.app.cob-spec-spec
-  (:require [speclj.core :refer :all]
+(ns http-clj.app.cob-spec-spec (:require [speclj.core :refer :all]
             [clj-http.client :as client]
             [http-clj.server :as s]
             [http-clj.file :as file]
@@ -13,11 +12,10 @@
 
 (defn start-server [app port]
   (let [latch (CountDownLatch. 1)
-        application (app "resources/static/")
-        thread (Thread. #(s/serve (s/create
-                                    :port port
-                                    :application application
-                                    :latch latch)))]
+        server #(s/serve (s/create :port port
+                                   :application (app "resources/static/")
+                                   :latch latch))
+        thread (Thread. server)]
     (.start thread)
     (.await latch)
     thread))
@@ -26,13 +24,14 @@
   (.interrupt thread)
   (client/get root))
 
-(def thread (start-server app 5000))
-
 (defn GET [path]
   (client/get (str root path) {:throw-exceptions false}))
 
+(def thread (atom nil))
+
 (describe "cob-spec"
-  (after-all (shutdown-server thread))
+  (before-all (reset! thread (start-server app 5000)))
+  (after-all (shutdown-server @thread))
   (it "has /"
     (let [{status :status body :body} (GET "/")]
       (should= 200 status)
