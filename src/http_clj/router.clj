@@ -22,7 +22,7 @@
   [_ _]
   false)
 
-(defn find-route [path routes]
+(defn find-route [routes path]
   (first (filter #(path-matches? path (:path %)) routes)))
 
 (defn lookup-route-id [routes path]
@@ -37,7 +37,7 @@
     (conj routes route)))
 
 (defn choose-handler [{:keys [path method] :as request} routes]
-  (if-let [route (find-route path routes)]
+  (if-let [route (find-route routes path)]
     (get-in route [:handlers method] handler/method-not-allowed)
     handler/not-found))
 
