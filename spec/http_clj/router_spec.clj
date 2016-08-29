@@ -7,7 +7,8 @@
 (describe "a router"
   (with-stubs)
   (with routes [["GET" "/a" (stub :handler-a)]
-                ["POST" "/b" (stub :handler-b)]])
+                ["POST" "/b" (stub :handler-b)]
+                ["GET" #"^/pattern/.*$" (stub :handler-z)]])
   (it "dispatches to handler-a"
     (router/route {:method "GET" :path "/a"} @routes)
     (should-not-have-invoked :handler-b)
@@ -28,6 +29,21 @@
                                         {:method "GET" :path "/b"} @routes)]
       (should= 404 status)))
 
+(it "it will find the handler for a route defined as a pattern"
+    (let [request {:method "GET" :path "/pattern/handler-z"}
+          {status :status body :body} (router/route request @routes)]
+      (should-have-invoked :handler-z {:times 1})))
+
   (it "can be provided with an alternate fallback handler"
     (should-invoke fallback {:times 1}
                    (router/route {:method "GET" :path "/c"} @routes :fallback fallback))))
+
+(describe "path-matches?"
+  (with request-path "/path/to/resource")
+  (it "matches a string path"
+    (should= true (router/path-matches? @request-path "/path/to/resource"))
+    (should= false (router/path-matches? @request-path "/resource")))
+
+  (it "matches a regex path"
+    (should= false (router/path-matches? @request-path #"/foo/.*"))
+    (should= true (router/path-matches? @request-path #"^/path/.*/resource$"))))
