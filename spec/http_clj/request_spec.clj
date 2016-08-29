@@ -37,24 +37,4 @@
                (get-in (request/create @get-conn) [:headers "Host"]))
 
       (should= "www.example.us"
-               (get-in (request/create @post-conn) [:headers "Host"]))))
-
-  (context "parse-request-line"
-    (it "parses the method"
-      (should= "GET" (:method (request/parse-request-line @get-conn)))
-      (should= "POST" (:method (request/parse-request-line @post-conn))))
-
-    (it "parses the path"
-      (should= "/file1" (:path (request/parse-request-line @get-conn)))
-      (should= "/file2" (:path (request/parse-request-line @post-conn))))
-
-    (it "parses the version"
-      (should= "HTTP/1.1" (:version (request/parse-request-line @get-conn)))
-      (should= "HTTP/1.1" (:version (request/parse-request-line @post-conn)))))
-
-  (context "parse-headers"
-    (before (request/parse-request-line @get-conn))
-
-    (it "parses the headers"
-      (should= {"Host" "www.example.com" "User-Agent" "Test-request"}
-               (request/parse-headers @get-conn)))))
+               (get-in (request/create @post-conn) [:headers "Host"])))))
