@@ -38,8 +38,7 @@
 
 (describe "choose-handler"
   (with routes [{:path "/a" :handlers {"GET" :handler-get-a "POST" :handler-post-a}}
-                {:path "/b" :handlers {"HEAD" :handler-head-b "GET" :handler-get-b}}
-                ])
+                {:path "/b" :handlers {"HEAD" :handler-head-b "GET" :handler-get-b}}])
 
   (it "chooses the get handler"
     (let [request {:method "GET" :path "/a"}]

@@ -41,6 +41,7 @@
   (context "method-not-allowed"
     (it "responds with status code 405"
       (should= 405 (:status (handler/method-not-allowed {}))))
+
     (it "has Method Not Allowed in the body"
       (should= "Method Not Allowed" (:body (handler/method-not-allowed {})))))
 
