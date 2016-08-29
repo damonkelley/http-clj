@@ -7,9 +7,10 @@
 
 (describe "a router"
   (with-stubs)
-  (with routes [["GET" "/a" (stub :handler-a)]
-                ["POST" "/b" (stub :handler-b)]
-                ["GET" #"^/pattern/.*$" (stub :handler-z)]])
+  (with routes [{:path "/a" :handlers {"GET" (stub :handler-a)}}
+                {:path "/b" :handlers {"POST" (stub :handler-b)}}
+                {:path #"^/pattern/.*$" :handlers {"GET" (stub :handler-z)}}])
+
   (it "dispatches to handler-a"
     (router/route {:method "GET" :path "/a"} @routes)
     (should-not-have-invoked :handler-b)
@@ -36,26 +37,26 @@
       (should-have-invoked :handler-z {:times 1}))))
 
 (describe "choose-handler"
-  (with routes [["GET" "/a" :handler-a]
-                ["POST" "/a" :handler-post-a]])
-  (it "finds the handler that matches the method and path"
+  (with routes [{:path "/a" :handlers {"GET" :handler-get-a "POST" :handler-post-a}}
+                {:path "/b" :handlers {"HEAD" :handler-head-b "GET" :handler-get-b}}
+                ])
+
+  (it "chooses the get handler"
     (let [request {:method "GET" :path "/a"}]
-    (should= :handler-a (router/choose-handler request @routes))))
+      (should= :handler-get-a (router/choose-handler request @routes))))
+
+  (it "chooses the post handler"
+    (let [request {:method "POST" :path "/a"}]
+      (should= :handler-post-a (router/choose-handler request @routes))))
+
+  (it "chooses the head handler"
+    (let [request {:method "HEAD" :path "/b"}]
+      (should= :handler-head-b (router/choose-handler request @routes))))
 
   (it "returns method-not-allowed if the path exists but not the method"
     (let [request {:method "DELETE" :path "/a"}]
     (should= handler/method-not-allowed (router/choose-handler request @routes))))
 
-  (it "returns not-found if neither the path or method match"
-    (let [request {:method "DELETE" :path "/b"}]
-    (should= handler/not-found (router/choose-handler request @routes)))))
-
-(describe "path-matches?"
-  (with request-path "/path/to/resource")
-  (it "matches a string path"
-    (should= true (router/path-matches? @request-path "/path/to/resource"))
-    (should= false (router/path-matches? @request-path "/resource")))
-
-  (it "matches a regex path"
-    (should= false (router/path-matches? @request-path #"/foo/.*"))
-    (should= true (router/path-matches? @request-path #"^/path/.*/resource$"))))
+  (it "returns not-found if the route does not exist"
+    (let [request {:method "DELETE" :path "/c"}]
+      (should= handler/not-found (router/choose-handler request @routes)))))
