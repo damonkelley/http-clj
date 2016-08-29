@@ -94,25 +94,38 @@
   (context "GET"
     (with routes [{:path "/a" :handlers {}}])
     (it "adds the GET handler route to the route"
-      (let [routes (GET @routes "/b" :get-handler)]
-        (should= :get-handler (get-in (last routes) [:handlers "GET"]))))
+      (let [route (-> @routes
+                      (GET "/b" :get-handler)
+                      (find-route "/b"))]
+        (should= :get-handler (get-in route [:handlers "GET"]))))
 
     (it "appends the route to the end of the routes vector"
-      (should= "/b" (:path (last (GET @routes "/b" :get-handler)))))
+      (let [route (-> @routes
+                      (GET "/b" :get-handler)
+                      last)]
+      (should= "/b" (:path route))))
 
     (it "provides a default HEAD handler"
-      (let [routes (GET @routes "/b" :handler)]
-        (should-be clojure.test/function? (get-in (last routes) [:handlers "HEAD"]))))
+      (let [route (-> @routes
+                       (GET "/b" :handler)
+                       (find-route "/b"))]
+        (should-be clojure.test/function? (get-in route [:handlers "HEAD"]))))
 
     (it "an alternate HEAD handler can be specified"
-      (let [routes (GET @routes "/b" :get-handler :head-handler)]
-        (should= :head-handler (get-in (last routes) [:handlers "HEAD"]))))
+      (let [route (-> @routes
+                       (GET "/b" :get-handler :head-handler)
+                       (find-route "/b"))]
+        (should= :head-handler (get-in route [:handlers "HEAD"]))))
 
     (it "updates with a route if it is already defined"
-      (let [route (find-route (GET @routes "/a" :handler) "/a")]
+      (let [route (-> @routes
+                      (GET "/a" :handler)
+                      (find-route "/a"))]
         (should= :handler (get-in route [:handlers "GET"]))))
 
     (it "can update a route with a pattern"
-      (let [routes (GET @routes #"^/.*$" :first-handler)
-            routes (GET routes #"^/.*$" :second-handler)]
-        (should= :second-handler (get-in (find-route routes #"^/.*$") [:handlers "GET"]))))))
+      (let [route (-> @routes
+                       (GET #"^/.*$" :first-handler)
+                       (GET #"^/.*$" :second-handler)
+                       (find-route #"^/.*$")) ]
+        (should= :second-handler (get-in route [:handlers "GET"]))))))
