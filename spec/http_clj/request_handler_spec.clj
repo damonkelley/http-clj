@@ -38,6 +38,12 @@
     (it "has Not Found in the body"
       (should= "Not Found" (:body (handler/not-found {})))))
 
+  (context "method-not-allowed"
+    (it "responds with status code 405"
+      (should= 405 (:status (handler/method-not-allowed {}))))
+    (it "has Method Not Allowed in the body"
+      (should= "Method Not Allowed" (:body (handler/method-not-allowed {})))))
+
   (context "file"
     (with test-path "/tmp/http-clj-test-file-handler")
     (with test-data "Some content")

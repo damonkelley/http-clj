@@ -12,6 +12,9 @@
 (defn not-found [request]
   (response/create request "Not Found" :status 404))
 
+(defn method-not-allowed [request]
+  (response/create request "Method Not Allowed" :status 405))
+
 (defn file
   ([request io-file] ((file (.getPath io-file)) request))
   ([path]
