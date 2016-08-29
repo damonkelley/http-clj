@@ -1,26 +1,59 @@
 (ns http-clj.router
-  (:require [http-clj.request-handler :as handler]))
+  (:require [http-clj.request-handler :as handler])
+  (:import java.util.regex.Pattern))
 
 (defmulti path-matches?
-  (fn [_ route-path]
-    (type route-path)))
+  (fn [path route-path]
+    [(type path) (type route-path)]))
 
-(defmethod path-matches? String
+(defmethod path-matches? [String String]
   [request-path route-path]
   (= request-path route-path))
 
-(defmethod path-matches? java.util.regex.Pattern
+(defmethod path-matches? [String Pattern]
   [request-path route-path]
   (not (nil? (re-matches route-path request-path))))
 
-(defn- find-route [{path :path} routes]
+(defmethod path-matches? [Pattern Pattern]
+  [path route-path]
+  (= (.pattern path) (.pattern route-path)))
+
+(defmethod path-matches? [Pattern String]
+  [_ _]
+  false)
+
+(defn find-route [path routes]
   (first (filter #(path-matches? path (:path %)) routes)))
 
-(defn choose-handler [{:keys [method] :as request} routes]
-  (if-let [route (find-route request routes)]
+(defn lookup-route-id [routes path]
+  (first
+    (first
+      (filter #(path-matches? path (:path (second %)))
+              (map-indexed vector routes)))))
+
+(defn update-route [routes route]
+  (if-let [route-id (lookup-route-id routes (:path route))]
+    (update routes route-id merge route)
+    (conj routes route)))
+
+(defn choose-handler [{:keys [path method] :as request} routes]
+  (if-let [route (find-route path routes)]
     (get-in route [:handlers method] handler/method-not-allowed)
     handler/not-found))
 
 (defn route [request routes]
   (let [handler (choose-handler request routes)]
     (handler request)))
+
+(defn GET
+  ([routes path handler]
+   (GET routes
+        path
+        handler
+        (partial handler/head handler)))
+
+  ([routes path get-handler head-handler]
+   (update-route routes
+                 {:path path
+                  :handlers {"GET" get-handler
+                             "HEAD" head-handler}})))
