@@ -3,7 +3,7 @@
             [http-clj.file :as file-helper]
             [http-clj.response :as response]))
 
-(defn fallback [request directory]
+(defn static [request directory]
   (let [file (file-helper/resolve directory (:path request))]
     (cond (.isDirectory file) (handler/directory request file)
           (.exists file) (handler/file request file)

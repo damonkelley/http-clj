@@ -13,8 +13,8 @@
 (defn- cob-spec [request directory]
   (route
     request
-    [["GET" "/log" #(handlers/log % log)]]
-    :fallback #(handlers/fallback % directory)))
+    [["GET" "/log" #(handlers/log % log)]
+     ["GET" #"/.*" #(handlers/static % directory)]]))
 
 (defn app [directory]
   {:entrypoint #(cob-spec % directory)
