@@ -5,31 +5,36 @@
             [http-clj.response :as response]
             [http-clj.lifecycle :as lifecycle]
             [http-clj.spec-helper.mock :as mock]
+            [http-clj.logging :as logging]
             [com.stuartsierra.component :as component])
   (:import java.io.ByteArrayOutputStream))
 
 (describe "a server component"
+  (with application {:entrypoint identity})
   (it "can be created using a port"
-    (let [server (s/create 5001)]
+    (let [server (s/create @application :port 5001)]
       (should-be-a java.net.ServerSocket (:server-socket server))
       (component/stop server)))
 
   (it "can be created by injecting a ServerSocket"
-    (let [server (s/create (mock/socket-server))]
+    (let [server (s/create @application :server-socket mock/socket-server)]
       (should-be-a java.net.ServerSocket (:server-socket server))))
 
   (it "will close the server"
     (let [server-socket (mock/socket-server)
-          server (s/create server-socket)]
-      (should= false (.isClosed server-socket))
+          server (s/create @application :server-socket mock/socket-server)]
+      (should= false (.isClosed (:server-socket server)))
       (component/stop server)
-      (should= true (.isClosed server-socket))))
+      (should= true (.isClosed (:server-socket server)))))
 
   (it "will accept connections"
     (should= true (satisfies? connection/Connection
-                              (-> (mock/socket-server)
-                                  (s/create)
+                              (-> (s/create @application :server-socket mock/socket-server)
                                   (s/accept))))))
+
+(defrecord DegenerateLogger []
+  logging/Logger
+  (log [this level contents]))
 
 (defn test-app [request]
   (when (not (:open (:conn request)))
@@ -38,12 +43,14 @@
 
 (describe "listen"
   (with server (mock/server))
+  (with application {:entrypoint test-app
+                     :logger (->DegenerateLogger)})
   (it "kicks off the request/response lifecycle"
     (should-invoke lifecycle/http {:times 1 :return (mock/connection)}
-                   (s/listen @server test-app)))
+                   (s/listen @server @application)))
 
   (it "closes the connection"
-    (let [{open :open} (s/listen @server test-app)]
+    (let [{open :open} (s/listen @server @application)]
       (should= false open))))
 
 (defn interrupting-app [request]
@@ -56,11 +63,10 @@
 
 (describe "serve"
   (with server (mock/server))
+  (with application {:entrypoint interrupting-app
+                     :logger (->DegenerateLogger)})
   (it "starts the component"
-    (should= true (:started (s/serve @server interrupting-app))))
-
-  (it "listens until interrupted"
-    (s/serve @server interrupting-app))
+    (should= true (:started (s/serve @server))))
 
   (it "stops the component"
-    (should= true (:stopped (s/serve @server interrupting-app)))))
+    (should= true (:stopped (s/serve @server)))))

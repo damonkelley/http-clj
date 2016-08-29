@@ -2,8 +2,7 @@
   (:require [speclj.core :refer :all]
             [http-clj.request :as request]
             [http-clj.spec-helper.mock :as mock]
-            [http-clj.spec-helper.request-generator :refer [POST GET]]
-            [clojure.java.io :as io]))
+            [http-clj.spec-helper.request-generator :refer [POST GET]]))
 
 (describe "request"
   (with get-conn

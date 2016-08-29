@@ -23,7 +23,7 @@
         (ByteArrayInputStream.
           (.getBytes input))))))
 
-(defn socket-server []
+(defn socket-server [& args]
   (let [closed? (atom false)]
     (proxy [java.net.ServerSocket] []
       (accept []
@@ -61,7 +61,7 @@
     (-> server
         (assoc :stopped true)))
 
-  server/AcceptingServer
+  server/Server
   (accept [server]
     (connection (GET "/" {"Host" "www.example.com"}))))
 

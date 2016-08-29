@@ -7,6 +7,7 @@
                  [org.clojure/tools.cli "0.3.5"]
                  [com.stuartsierra/component  "0.3.1"]
                  [clj-http "2.2.0"]
+                 [com.taoensso/timbre "4.7.4"]
                  [hiccup "1.0.5"]]
   :profiles {:dev {:dependencies [[speclj "3.3.1"]]}}
   :plugins [[speclj "3.3.1"]]

@@ -1,5 +1,6 @@
 (ns http-clj.request
   (:require [http-clj.connection :as connection]
+            [http-clj.logging :as logging]
             [clojure.string :as string]))
 
 (defn- split-request-line [conn]
@@ -31,6 +32,6 @@
   (assoc request :headers (parse-headers (:conn request))))
 
 (defn create [conn]
-  (-> {:conn conn}
-      attach-request-line
-      attach-headers))
+   (-> {:conn conn}
+       attach-request-line
+       attach-headers))
