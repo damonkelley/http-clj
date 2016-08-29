@@ -65,13 +65,13 @@
             resp (handler/head handler {})]
       (should= nil (:body resp))))
 
-    (it "it keeps the headers"
+    (it "keeps the headers"
       (let [handler #(response/create % "Body" :headers {"Host" "www.example.com"})
             resp (handler/head handler {})]
       (should= {"Host" "www.example.com"} (:headers resp))
       (should= 200 (:status resp)))))
 
-  (it "it keeps the status"
+  (it "keeps the status"
     (let [handler #(response/create % "Body" :status 201 :headers {"User-Agent" "test-agent"})
           resp (handler/head handler {})]
       (should= {"User-Agent" "test-agent"} (:headers resp)))))
