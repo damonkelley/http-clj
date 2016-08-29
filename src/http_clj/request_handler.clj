@@ -9,6 +9,11 @@
         html (template/directory files)]
   (response/create request html :headers {"Content-Type" "text/html"})))
 
+(defn head [handler request]
+  (-> request
+      handler
+      (assoc :body nil)))
+
 (defn not-found [request]
   (response/create request "Not Found" :status 404))
 
