@@ -1,6 +1,7 @@
 (ns http-clj.router-spec
   (:require [speclj.core :refer :all]
-            [http-clj.router :as router]))
+            [http-clj.router :as router]
+            [http-clj.request-handler :as handler]))
 
 (defn fallback [request])
 
@@ -24,19 +25,30 @@
                                         {:method "GET" :path "/"} @routes)]
       (should= 404 status)))
 
-  (it "will not find the handler if the path matches but the method does not"
+  (it "responds with method not allowed if the path matches but the method does not"
     (let [{status :status body :body} (router/route
                                         {:method "GET" :path "/b"} @routes)]
-      (should= 404 status)))
+      (should= 405 status)))
 
-(it "it will find the handler for a route defined as a pattern"
+  (it "it will find the handler for a route defined as a pattern"
     (let [request {:method "GET" :path "/pattern/handler-z"}
           {status :status body :body} (router/route request @routes)]
-      (should-have-invoked :handler-z {:times 1})))
+      (should-have-invoked :handler-z {:times 1}))))
 
-  (it "can be provided with an alternate fallback handler"
-    (should-invoke fallback {:times 1}
-                   (router/route {:method "GET" :path "/c"} @routes :fallback fallback))))
+(describe "choose-handler"
+  (with routes [["GET" "/a" :handler-a]
+                ["POST" "/a" :handler-post-a]])
+  (it "finds the handler that matches the method and path"
+    (let [request {:method "GET" :path "/a"}]
+    (should= :handler-a (router/choose-handler request @routes))))
+
+  (it "returns method-not-allowed if the path exists but not the method"
+    (let [request {:method "DELETE" :path "/a"}]
+    (should= handler/method-not-allowed (router/choose-handler request @routes))))
+
+  (it "returns not-found if neither the path or method match"
+    (let [request {:method "DELETE" :path "/b"}]
+    (should= handler/not-found (router/choose-handler request @routes)))))
 
 (describe "path-matches?"
   (with request-path "/path/to/resource")

@@ -14,14 +14,22 @@
   [request-path route-path]
   (not (nil? (re-matches route-path request-path))))
 
-(defn- find-route [{method :method path :path} routes]
-  (first
-    (filter
-      #(and (= (first %1) method) (path-matches? path (second %1)))
-      routes)))
+(defn- route-matches? [{method :method path :path} route]
+  (and (= (first route) method)
+       (path-matches? path (second route))))
 
-(defn route [request routes & {:keys [fallback]
-                               :or {fallback handler/not-found}}]
-  (let [fallback-route [nil nil fallback]
-        [_ _ handler] (or (find-route request routes) fallback-route)]
+(defn- find-route [request routes]
+  (first (filter (partial route-matches? request) routes)))
+
+(defn- has-route-for-path [{request-path :path} routes]
+  (some #(path-matches? request-path (second %)) routes))
+
+(defn choose-handler [request routes]
+  (let [matching-route (find-route request routes)]
+    (cond matching-route (last matching-route)
+          (has-route-for-path request routes) handler/method-not-allowed
+          :else handler/not-found)))
+
+(defn route [request routes]
+  (let [handler (choose-handler request routes)]
     (handler request)))
