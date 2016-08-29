@@ -6,8 +6,8 @@
 
 (describe "a router"
   (with-stubs)
-  (with routes {["GET" "/a"] (stub :handler-a)
-                ["POST" "/b"] (stub :handler-b)})
+  (with routes [["GET" "/a" (stub :handler-a)]
+                ["POST" "/b" (stub :handler-b)]])
   (it "dispatches to handler-a"
     (router/route {:method "GET" :path "/a"} @routes)
     (should-not-have-invoked :handler-b)
