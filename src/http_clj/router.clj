@@ -7,12 +7,12 @@
     [(type path) (type route-path)]))
 
 (defmethod path-matches? [String String]
-  [request-path route-path]
-  (= request-path route-path))
+  [path route-path]
+  (= path route-path))
 
 (defmethod path-matches? [String Pattern]
-  [request-path route-path]
-  (not (nil? (re-matches route-path request-path))))
+  [path route-path]
+  (not (nil? (re-matches route-path path))))
 
 (defmethod path-matches? [Pattern Pattern]
   [path route-path]
@@ -25,11 +25,20 @@
 (defn find-route [routes path]
   (first (filter #(path-matches? path (:path %)) routes)))
 
-(defn lookup-route-id [routes path]
-  (first
-    (first
-      (filter #(path-matches? path (:path (second %)))
-              (map-indexed vector routes)))))
+(defn- associate-route-ids [routes]
+  (map-indexed vector routes))
+
+(defn- filter-id-route-pairs-by-path [id-route-pairs path]
+  (filter #(path-matches? path (:path (second %))) id-route-pairs))
+
+(defn- extract-first-id [id-route-pairs]
+  (first (first id-route-pairs)))
+
+(defn- lookup-route-id [routes path]
+  (-> routes
+       associate-route-ids
+       (filter-id-route-pairs-by-path path)
+       extract-first-id))
 
 (defn update-route [routes route]
   (if-let [route-id (lookup-route-id routes (:path route))]
