@@ -20,6 +20,10 @@
 
 (defmethod path-matches? [Pattern String]
   [_ _]
+  ; A pattern should not match to a string in this direction
+  ; For instance, #"/.*" will match against the first path it
+  ; encounters instead of matching against a route with the
+  ; #"/.*" path.
   false)
 
 (defn find-route [routes path]
