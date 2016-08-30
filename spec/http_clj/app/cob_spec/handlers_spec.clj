@@ -5,16 +5,16 @@
   (:import java.io.ByteArrayOutputStream))
 
 (describe "handlers"
-  (context "fallback"
+  (context "static"
     (with dir "resources/static/")
     (it "responds with a listing if directory"
-      (should-contain "image.gif" (:body (fallback {:path "/"} @dir))))
+      (should-contain "image.gif" (:body (static {:path "/"} @dir))))
 
     (it "responds with a file if it is a file"
-      (should-contain "File contents" (String. (:body (fallback {:path "/file.txt"} @dir)))))
+      (should-contain "File contents" (String. (:body (static {:path "/file.txt"} @dir)))))
 
     (it "responds with 404 if a file is not found"
-      (should= 404 (:status (fallback {:path "/file-that-does-not-exist.txt"} @dir)))))
+      (should= 404 (:status (static {:path "/file-that-does-not-exist.txt"} @dir)))))
 
   (context "log"
     (with output (ByteArrayOutputStream.))
