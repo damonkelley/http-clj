@@ -4,6 +4,7 @@
 
 (defprotocol Connection
   (readline [conn])
+  (read [conn buffer])
   (write [conn output])
   (close [conn]))
 
@@ -12,6 +13,10 @@
 
   (readline [conn]
     (.readLine reader))
+
+  (read [conn buffer]
+    (.read (.getInputStream socket) buffer)
+    buffer)
 
   (write [conn output]
     (.write writer output)

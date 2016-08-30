@@ -1,6 +1,6 @@
 (ns http-clj.connection-spec
   (:require [speclj.core :refer :all]
-            [http-clj.connection :refer [write readline create close]]
+            [http-clj.connection :as connection]
             [http-clj.spec-helper.mock :as mock])
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
@@ -9,20 +9,25 @@
   (ByteArrayOutputStream.))
 
 (describe "a connection"
-  (with conn (create (mock/socket "line 1\nline 2" output)))
+  (with conn (connection/create (mock/socket "line 1\nline 2" output)))
 
-  (it "can be read from"
-    (should= "line 1" (readline @conn))
-    (should= "line 2" (readline @conn)))
+  (it "can be have lines read from it"
+    (should= "line 1" (connection/readline @conn))
+    (should= "line 2" (connection/readline @conn)))
+
+  (it "can be read into a buffer"
+    (let [buffer-length (alength (.getBytes "line 1\nline 2"))
+          buffer (connection/read @conn (byte-array buffer-length))]
+      (should= "line 1\nline 2" (String. buffer))))
 
   (it "will yield a connection when written to"
-   (should= @conn (write @conn (.getBytes ""))))
+    (should= @conn (connection/write @conn (.getBytes ""))))
 
   (it "can be written to"
-    (write @conn (.getBytes "data written to out"))
+    (connection/write @conn (.getBytes "data written to out"))
     (should= "data written to out" (.toString output)))
 
   (it "can be closed"
-     (should= false (.isClosed (:socket @conn)))
-     (should= nil (:socket (close @conn)))
-     (should= true (.isClosed (:socket @conn)))))
+    (should= false (.isClosed (:socket @conn)))
+    (should= nil (:socket (connection/close @conn)))
+    (should= true (.isClosed (:socket @conn)))))

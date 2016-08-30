@@ -35,13 +35,16 @@
       (isClosed []
         @closed?))))
 
-(defrecord MockConnection [open input]
+(defrecord MockConnection [open input-stream reader]
   connection/Connection
   (readline [conn]
-    (.readLine input))
+    (.readLine reader))
 
   (write [conn text]
     (assoc conn :written-to-connection (String. text)))
+
+  (read [conn buffer]
+    (.read input-stream buffer))
 
   (close [conn]
     (assoc conn :open false)))
@@ -50,7 +53,9 @@
   ([]
    (connection ""))
   ([input]
-   (MockConnection. true (io/reader (.getBytes input)))))
+   (let [input-stream (ByteArrayInputStream. (.getBytes input))
+         reader (io/reader input-stream)]
+   (MockConnection. true input-stream reader))))
 
 (defrecord MockServer [started stopped]
   component/Lifecycle
