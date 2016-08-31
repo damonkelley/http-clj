@@ -5,14 +5,14 @@
 
 (defprotocol Connection
   (read-bytes [conn buffer])
-  (read-char [conn])
+  (read-byte [conn])
   (write [conn output])
   (close [conn]))
 
 (defrecord SocketConnection [socket reader writer]
   Connection
-  (read-char [conn]
-    (.read reader))
+  (read-byte [conn]
+    (.read (.getInputStream socket)))
 
   (read-bytes [conn length]
     (let [buffer (byte-array length)]
@@ -32,5 +32,5 @@
   ([host port] (create (Socket. host port)))
   ([socket]
    (map->SocketConnection {:socket socket
-                           :reader (InputStreamReader. (.getInputStream socket))
+                           :reader (.getInputStream socket)
                            :writer (.getOutputStream socket)})))

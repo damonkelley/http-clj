@@ -4,7 +4,7 @@
 
 (defn readline [conn]
     (loop [line []]
-      (let [character (connection/read-char conn)]
+      (let [character (connection/read-byte conn)]
         (if (some #(= character %) (map int [\newline -1]))
           (String. (byte-array (filter #(not= (int \return) %) line)))
           (recur (conj line character))))))

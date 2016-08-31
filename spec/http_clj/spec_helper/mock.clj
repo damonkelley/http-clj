@@ -1,14 +1,14 @@
 (ns http-clj.spec-helper.mock
   (:require [http-clj.connection :as connection]
             [http-clj.server :as server]
-            [clojure.java.io :as io]
             [com.stuartsierra.component :as component]
             [http-clj.spec-helper.request-generator :refer [GET]])
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
 (defn socket [input output]
-  (let [connected? (atom true)]
+  (let [connected? (atom true)
+        input-stream (ByteArrayInputStream. (.getBytes input))]
     (proxy [java.net.Socket] []
       (close []
         (reset! connected? false))
@@ -20,8 +20,7 @@
         output)
 
       (getInputStream []
-        (ByteArrayInputStream.
-          (.getBytes input))))))
+        input-stream))))
 
 (defn socket-server [& args]
   (let [closed? (atom false)]
@@ -35,13 +34,13 @@
       (isClosed []
         @closed?))))
 
-(defrecord MockConnection [open input-stream reader]
+(defrecord MockConnection [open input-stream]
   connection/Connection
   (write [conn text]
     (assoc conn :written-to-connection (String. text)))
 
-  (read-char [conn]
-    (.read reader))
+  (read-byte [conn]
+    (.read input-stream))
 
   (read-bytes [conn length]
     (let [buffer (byte-array length)]
@@ -55,8 +54,7 @@
   ([]
    (connection ""))
   ([input]
-   (let [input-stream (ByteArrayInputStream. (.getBytes input))]
-     (MockConnection. true input-stream input-stream))))
+   (MockConnection. true (ByteArrayInputStream. (.getBytes input)))))
 
 (defrecord MockServer [started stopped]
   component/Lifecycle
