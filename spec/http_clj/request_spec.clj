@@ -13,7 +13,9 @@
   (with post-conn
     (mock/connection
       (POST "/file2"
-            {"Host" "www.example.us" "User-Agent" "Test-request"}
+            {"Host" "www.example.us"
+             "User-Agent" "Test-request"
+             "Content-Length" 8}
             "var=data")))
 
   (context "when created"
@@ -35,6 +37,9 @@
     (it "has headers"
       (should= "www.example.com"
                (get-in (request/create @get-conn) [:headers "Host"]))
-
       (should= "www.example.us"
-               (get-in (request/create @post-conn) [:headers "Host"])))))
+               (get-in (request/create @post-conn) [:headers "Host"])))
+
+    (it "has a body"
+      (should= nil (:body (request/create @get-conn)))
+      (should= "var=data" (String. (:body (request/create @post-conn)))))))
