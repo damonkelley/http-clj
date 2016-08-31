@@ -43,7 +43,10 @@
        (filter-id-route-pairs-by-path path)
        extract-first-id))
 
+(defn- merge-route [old-route new-route]
+  (update old-route :handlers merge (:handlers new-route)))
+
 (defn update-route [routes route]
   (if-let [route-id (lookup-route-id routes (:path route))]
-    (update routes route-id merge route)
+    (update routes route-id merge-route route)
     (conj routes route)))

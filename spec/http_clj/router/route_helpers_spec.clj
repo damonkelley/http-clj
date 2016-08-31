@@ -4,7 +4,7 @@
 
 (describe "router.route-helpers"
   (context "find-route"
-    (with routes [{:path "/a" :handlers {"GET" :handler-a}}
+    (with routes [{:path "/a" :handlers {"GET" :handler-a }}
                   {:path "/b" :handlers {"POST" :handler-b}}
                   {:path #"^/pattern/.*$" :handlers {"GET" :handler-z}}])
 
@@ -19,12 +19,13 @@
       (should= {"GET" :handler-z} (:handlers (find-route @routes #"^/pattern/.*$")))))
 
   (context "update-route"
-    (with routes [{:path "/a" :handlers {"GET" :handler-a}}
+    (with routes [{:path "/a" :handlers {"GET" :get-handler "POST" :post-handler}}
                   {:path #"^/path/.*$" :handlers {}}])
 
     (it "update the route if it exists"
       (let [routes (update-route @routes {:path "/a" :handlers {"GET" :new-handler}})]
-        (should= {:path "/a" :handlers {"GET" :new-handler}} (find-route routes "/a"))))
+        (should= {:path "/a" :handlers {"GET" :new-handler "POST" :post-handler}}
+                 (find-route routes "/a"))))
 
     (it "appends a new route if the path doesn't exist"
       (let [routes (update-route @routes {:path "/b" :handlers {}})]
@@ -33,4 +34,3 @@
     (it "can update a route with a pattern path"
       (let [routes (update-route @routes {:path #"^/path/.*$" :handlers {"GET" :handler}})]
         (should= {"GET" :handler}  (:handlers (find-route routes #"^/path/.*$")))))))
-
