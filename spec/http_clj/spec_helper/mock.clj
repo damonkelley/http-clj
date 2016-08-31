@@ -43,7 +43,7 @@
   (read-char [conn]
     (.read reader))
 
-  (read [conn buffer]
+  (read-bytes [conn buffer]
     (.read input-stream buffer))
 
   (close [conn]

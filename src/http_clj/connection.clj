@@ -4,7 +4,7 @@
            java.io.InputStreamReader))
 
 (defprotocol Connection
-  (read [conn buffer])
+  (read-bytes [conn buffer])
   (read-char [conn])
   (write [conn output])
   (close [conn]))
@@ -14,7 +14,7 @@
   (read-char [conn]
     (.read reader))
 
-  (read [conn buffer]
+  (read-bytes [conn buffer]
     (.read (.getInputStream socket) buffer)
     buffer)
 

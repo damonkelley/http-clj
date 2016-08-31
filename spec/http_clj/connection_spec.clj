@@ -17,7 +17,7 @@
 
   (it "can be read into a buffer"
     (let [buffer-length (alength (.getBytes "line 1\nline 2"))
-          buffer (connection/read @conn (byte-array buffer-length))]
+          buffer (connection/read-bytes @conn (byte-array buffer-length))]
       (should= "line 1\nline 2" (String. buffer))))
 
   (it "will yield a connection when written to"
