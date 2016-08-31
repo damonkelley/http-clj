@@ -2,12 +2,24 @@
   (:require [http-clj.connection :as connection]
             [clojure.string :as string]))
 
+(defn- continue-reading? [-byte]
+  (some #(= -byte %) (map int [\newline -1])))
+
+(defn- remove-carriage-returns [-bytes]
+  (remove #(= (int \return) %) -bytes))
+
+(defn- convert-to-string [-bytes]
+  (-> -bytes
+      remove-carriage-returns
+      byte-array
+      String.))
+
 (defn readline [conn]
-    (loop [line []]
-      (let [character (connection/read-byte conn)]
-        (if (some #(= character %) (map int [\newline -1]))
-          (String. (byte-array (filter #(not= (int \return) %) line)))
-          (recur (conj line character))))))
+    (loop [-bytes []]
+      (let [-byte (connection/read-byte conn)]
+        (if (continue-reading? -byte)
+          (convert-to-string -bytes)
+          (recur (conj -bytes -byte))))))
 
 (defn- split-request-line [conn]
   (-> conn
