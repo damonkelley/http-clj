@@ -19,7 +19,14 @@
         (partial handler/head handler)))
 
   ([routes path get-handler head-handler]
-   (helper/update-route routes
-                 {:path path
-                  :handlers {"GET" get-handler
-                             "HEAD" head-handler}})))
+   (helper/update-route
+     routes
+     {:path path
+      :handlers {"GET" get-handler
+                 "HEAD" head-handler}})))
+
+(defn POST [routes path handler]
+  (helper/update-route
+    routes
+    {:path path
+     :handlers {"POST" handler}}))
