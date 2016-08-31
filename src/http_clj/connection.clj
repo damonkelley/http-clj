@@ -9,19 +9,21 @@
   (write [conn output])
   (close [conn]))
 
-(defrecord SocketConnection [socket reader writer]
+(defrecord SocketConnection [socket]
   Connection
   (read-byte [conn]
     (.read (.getInputStream socket)))
 
   (read-bytes [conn length]
     (let [buffer (byte-array length)]
-      (.read (.getInputStream socket) buffer)
+      (doto (.getInputStream socket)
+        (.read buffer))
       buffer))
 
   (write [conn output]
-    (.write writer output)
-    (.flush writer)
+    (doto (.getOutputStream socket)
+      (.write output)
+      (.flush))
     conn)
 
   (close [conn]
@@ -31,6 +33,4 @@
 (defn create
   ([host port] (create (Socket. host port)))
   ([socket]
-   (map->SocketConnection {:socket socket
-                           :reader (.getInputStream socket)
-                           :writer (.getOutputStream socket)})))
+   (map->SocketConnection {:socket socket})))
