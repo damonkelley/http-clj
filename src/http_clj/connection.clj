@@ -14,9 +14,10 @@
   (read-char [conn]
     (.read reader))
 
-  (read-bytes [conn buffer]
-    (.read (.getInputStream socket) buffer)
-    buffer)
+  (read-bytes [conn length]
+    (let [buffer (byte-array length)]
+      (.read (.getInputStream socket) buffer)
+      buffer))
 
   (write [conn output]
     (.write writer output)

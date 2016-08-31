@@ -14,7 +14,9 @@
   (with post-request
     {:conn (mock/connection
              (POST "/file2"
-                   {"Host" "www.example.us" "User-Agent" "Test-request"}
+                   {"Host" "www.example.us"
+                    "User-Agent" "Test-request"
+                    "Content-Length" 8}
                    "var=data"))})
 
   (context "readline"
@@ -46,4 +48,16 @@
 
     (it "parses the headers"
       (should= {"Host" "www.example.com" "User-Agent" "Test-request"}
-               (parser/headers @get-request)))))
+               (parser/headers @get-request))))
+
+  (context "read-body"
+    (it "is nil if the there is not body to read"
+      (let [request (-> @get-request
+                        (merge  (parser/request-line @get-request))
+                        (assoc :headers (parser/headers @get-request)))]
+      (should= nil (parser/read-body request))))
+    (it "returns the body if present"
+      (let [request (-> @post-request
+                        (merge  (parser/request-line @post-request))
+                        (assoc :headers (parser/headers@post-request)))]
+      (should= "var=data" (String. (parser/read-body request)))))))

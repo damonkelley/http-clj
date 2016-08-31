@@ -30,3 +30,7 @@
       (if (empty? header)
         headers
         (recur conn (merge headers (parse-header header)))))))
+
+(defn read-body [{:keys [headers conn]}]
+  (if-let [content-length (get headers "Content-Length")]
+    (connection/read-bytes conn (Integer/parseInt content-length))))

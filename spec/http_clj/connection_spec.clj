@@ -15,10 +15,9 @@
     (should= (int \l) (connection/read-char @conn))
     (should= (int \i) (connection/read-char @conn)))
 
-  (it "can be read into a buffer"
-    (let [buffer-length (alength (.getBytes "line 1\nline 2"))
-          buffer (connection/read-bytes @conn (byte-array buffer-length))]
-      (should= "line 1\nline 2" (String. buffer))))
+  (it "reads the input as a byte array"
+    (let [length (alength (.getBytes "line 1\nline 2"))]
+      (should= "line 1\nline 2" (String. (connection/read-bytes @conn length)))))
 
   (it "will yield a connection when written to"
     (should= @conn (connection/write @conn (.getBytes ""))))

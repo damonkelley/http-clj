@@ -43,8 +43,10 @@
   (read-char [conn]
     (.read reader))
 
-  (read-bytes [conn buffer]
-    (.read input-stream buffer))
+  (read-bytes [conn length]
+    (let [buffer (byte-array length)]
+      (.read input-stream buffer)
+      buffer))
 
   (close [conn]
     (assoc conn :open false)))
@@ -53,9 +55,8 @@
   ([]
    (connection ""))
   ([input]
-   (let [input-stream (ByteArrayInputStream. (.getBytes input))
-         reader (io/reader input-stream)]
-   (MockConnection. true input-stream reader))))
+   (let [input-stream (ByteArrayInputStream. (.getBytes input))]
+     (MockConnection. true input-stream input-stream))))
 
 (defrecord MockServer [started stopped]
   component/Lifecycle
