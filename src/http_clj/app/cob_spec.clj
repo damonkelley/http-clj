@@ -1,5 +1,5 @@
 (ns http-clj.app.cob-spec
-  (:require [http-clj.router :refer [route GET]]
+  (:require [http-clj.router :refer [route GET POST]]
             [http-clj.server :refer [run]]
             [http-clj.app.cob-spec.handlers :as handlers]
             [http-clj.app.cob-spec.cli :as cli]
@@ -9,12 +9,15 @@
   (:import java.io.ByteArrayOutputStream))
 
 (def log (ByteArrayOutputStream.))
+(def form-cache (atom ""))
 
 (defn- cob-spec [request directory]
   (route
     request
     (-> []
        (GET "/log" #(handlers/log % log))
+       (POST "/form" #(handlers/submit-form % form-cache))
+       (GET "/form" #(handlers/last-submission % form-cache))
        (GET #"^/.*$" #(handlers/static % directory)))))
 
 (defn app [directory]
