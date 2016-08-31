@@ -6,7 +6,9 @@
   (:import java.io.ByteArrayInputStream
            java.io.ByteArrayOutputStream))
 
-(defn socket [input output]
+(defn socket
+  ([input] (socket input nil))
+  ([input output]
   (let [connected? (atom true)
         input-stream (ByteArrayInputStream. (.getBytes input))]
     (proxy [java.net.Socket] []
@@ -20,7 +22,7 @@
         output)
 
       (getInputStream []
-        input-stream))))
+        input-stream)))))
 
 (defn socket-server [& args]
   (let [closed? (atom false)]
@@ -34,27 +36,11 @@
       (isClosed []
         @closed?))))
 
-(defrecord MockConnection [open input-stream]
-  connection/Connection
-  (write [conn text]
-    (assoc conn :written-to-connection (String. text)))
-
-  (read-byte [conn]
-    (.read input-stream))
-
-  (read-bytes [conn length]
-    (let [buffer (byte-array length)]
-      (.read input-stream buffer)
-      buffer))
-
-  (close [conn]
-    (assoc conn :open false)))
-
 (defn connection
   ([]
    (connection ""))
   ([input]
-   (MockConnection. true (ByteArrayInputStream. (.getBytes input)))))
+   (connection/create (socket input (ByteArrayOutputStream.)))))
 
 (defrecord MockServer [started stopped]
   component/Lifecycle

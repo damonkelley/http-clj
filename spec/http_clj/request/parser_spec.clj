@@ -55,9 +55,9 @@
       (let [request (-> @get-request
                         (merge  (parser/request-line @get-request))
                         (assoc :headers (parser/headers @get-request)))]
-      (should= nil (parser/read-body request))))
+        (should= nil (parser/read-body request))))
     (it "returns the body if present"
       (let [request (-> @post-request
                         (merge  (parser/request-line @post-request))
                         (assoc :headers (parser/headers@post-request)))]
-      (should= "var=data" (String. (parser/read-body request)))))))
+        (should= "var=data" (String. (parser/read-body request)))))))

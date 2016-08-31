@@ -37,7 +37,7 @@
   (log [this level contents]))
 
 (defn test-app [request]
-  (when (not (:open (:conn request)))
+  (when (.isClosed (:socket (:conn request)))
     (should-fail "The connection should be open"))
   (response/create request "App was called"))
 
@@ -50,8 +50,8 @@
                    (s/listen @server @application)))
 
   (it "closes the connection"
-    (let [{open :open} (s/listen @server @application)]
-      (should= false open))))
+    (let [{socket :socket} (s/listen @server @application)]
+      (should= nil socket))))
 
 (defn interrupting-app [request]
   (loop [count 3]
