@@ -2,9 +2,16 @@
   (:require [http-clj.connection :as connection]
             [clojure.string :as string]))
 
+(defn readline [conn]
+    (loop [line []]
+      (let [character (connection/read-char conn)]
+        (if (some #(= character %) (map int [\newline -1]))
+          (String. (byte-array (filter #(not= (int \return) %) line)))
+          (recur (conj line character))))))
+
 (defn- split-request-line [conn]
   (-> conn
-      (connection/readline)
+      (readline)
       (string/split #" ")))
 
 (defn request-line [request]
@@ -19,7 +26,7 @@
 
 (defn headers [request]
   (loop [conn (:conn request) headers {}]
-    (let [header (connection/readline conn)]
+    (let [header (readline conn)]
       (if (empty? header)
         headers
         (recur conn (merge headers (parse-header header)))))))

@@ -37,11 +37,11 @@
 
 (defrecord MockConnection [open input-stream reader]
   connection/Connection
-  (readline [conn]
-    (.readLine reader))
-
   (write [conn text]
     (assoc conn :written-to-connection (String. text)))
+
+  (read-char [conn]
+    (.read reader))
 
   (read [conn buffer]
     (.read input-stream buffer))

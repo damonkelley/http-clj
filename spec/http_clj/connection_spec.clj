@@ -11,9 +11,9 @@
 (describe "a connection"
   (with conn (connection/create (mock/socket "line 1\nline 2" output)))
 
-  (it "can be have lines read from it"
-    (should= "line 1" (connection/readline @conn))
-    (should= "line 2" (connection/readline @conn)))
+  (it "reads one character"
+    (should= (int \l) (connection/read-char @conn))
+    (should= (int \i) (connection/read-char @conn)))
 
   (it "can be read into a buffer"
     (let [buffer-length (alength (.getBytes "line 1\nline 2"))
