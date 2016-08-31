@@ -1,6 +1,7 @@
 (ns http-clj.request-handler-spec
   (:require [speclj.core :refer :all]
             [http-clj.request-handler :as handler]
+            [http-clj.response :as response]
             [clojure.java.io :as io]
             [hiccup.core :refer [html]])
   (:import java.io.File))
@@ -56,4 +57,21 @@
 
     (it "can accept a request and a file object"
       (let [{message :body} (handler/file {} (io/file @test-path))]
-        (should= (seq message) (seq (.getBytes @test-data)))))))
+        (should= (seq message) (seq (.getBytes @test-data))))))
+
+  (context "head"
+    (it "returns a resp with the body stripped out"
+      (let [handler #(response/create % "Body" :status 200)
+            resp (handler/head handler {})]
+      (should= nil (:body resp))))
+
+    (it "keeps the headers"
+      (let [handler #(response/create % "Body" :headers {"Host" "www.example.com"})
+            resp (handler/head handler {})]
+      (should= {"Host" "www.example.com"} (:headers resp))
+      (should= 200 (:status resp)))))
+
+  (it "keeps the status"
+    (let [handler #(response/create % "Body" :status 201 :headers {"User-Agent" "test-agent"})
+          resp (handler/head handler {})]
+      (should= {"User-Agent" "test-agent"} (:headers resp)))))

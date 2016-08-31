@@ -1,5 +1,5 @@
 (ns http-clj.app.cob-spec
-  (:require [http-clj.router :refer [route]]
+  (:require [http-clj.router :refer [route GET]]
             [http-clj.server :refer [run]]
             [http-clj.app.cob-spec.handlers :as handlers]
             [http-clj.app.cob-spec.cli :as cli]
@@ -13,8 +13,9 @@
 (defn- cob-spec [request directory]
   (route
     request
-    [{:path "/log" :handlers {"GET" #(handlers/log % log)}}
-     {:path #"/.*" :handlers {"GET" #(handlers/static % directory)}}]))
+    (-> []
+       (GET "/log" #(handlers/log % log))
+       (GET #"^/.*$" #(handlers/static % directory)))))
 
 (defn app [directory]
   {:entrypoint #(cob-spec % directory)
