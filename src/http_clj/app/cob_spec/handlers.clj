@@ -11,3 +11,10 @@
 
 (defn log [request log]
   (response/create request (.toString log)))
+
+(defn submit-form [request cache]
+  (reset! cache (String. (:body request)))
+  (response/create request ""))
+
+(defn last-submission [request cache]
+  (response/create request @cache))
