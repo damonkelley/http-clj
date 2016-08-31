@@ -40,4 +40,3 @@
 
           (reset! cache "submitted=twice")
           (should= "submitted=twice" (:body (last-submission {} cache))))))))
-
