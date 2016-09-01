@@ -39,4 +39,9 @@
           (should= "submitted=true" (:body (last-submission {} cache)))
 
           (reset! cache "submitted=twice")
-          (should= "submitted=twice" (:body (last-submission {} cache))))))))
+          (should= "submitted=twice" (:body (last-submission {} cache)))))))
+
+  (context "options"
+    (it "returns a handler to report the allowed methods"
+      (let [options-handler (options "GET" "POST" "OPTIONS")]
+        (should= {"Allow" "GET,POST,OPTIONS"} (:headers (options-handler {})))))))

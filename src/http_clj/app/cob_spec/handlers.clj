@@ -1,7 +1,8 @@
 (ns http-clj.app.cob-spec.handlers
   (:require [http-clj.request-handler :as handler]
             [http-clj.file :as file-helper]
-            [http-clj.response :as response]))
+            [http-clj.response :as response]
+            [clojure.string :as string]))
 
 (defn static [request directory]
   (let [file (file-helper/resolve directory (:path request))]
@@ -18,3 +19,7 @@
 
 (defn last-submission [request cache]
   (response/create request @cache))
+
+(defn options [& allowed-options]
+  (let [allow (string/join "," allowed-options)]
+    #(response/create % "" :headers {"Allow" allow})))
