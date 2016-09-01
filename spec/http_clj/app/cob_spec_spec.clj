@@ -27,6 +27,10 @@
 (defn GET [path]
   (client/get (str root path) {:throw-exceptions false}))
 
+(defn POST [path data]
+  (client/post (str root path) {:form-params data
+                                :throw-exceptions false}))
+
 (def thread (atom nil))
 
 (describe "cob-spec"
@@ -38,8 +42,15 @@
       (should-contain "file.txt" body)
       (should-contain "image.gif" body)))
 
-    (it "has /image.gif"
-      (should= 200 (:status (GET "/image.gif"))))
+  (it "has /image.gif"
+    (should= 200 (:status (GET "/image.gif"))))
 
-    (it "has a viewable log"
-      (should-contain "GET /log HTTP/1.1" (:body (GET "/log")))))
+  (it "has a viewable log"
+    (should-contain "GET /log HTTP/1.1" (:body (GET "/log"))))
+
+  (it "data can be posted to /form"
+    (let [{status :status} (POST "/form" {:form-data true})]
+      (should= 200 status))
+    (should-contain "form-data=true" (:body (GET "/form")))
+    (POST "/form" {:new-form-data true})
+    (should-contain "new-form-data=true" (:body (GET "/form")))))

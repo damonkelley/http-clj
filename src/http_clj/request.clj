@@ -10,7 +10,11 @@
 (defn- attach-headers [request]
   (assoc request :headers (parser/headers request)))
 
+(defn- attach-body [request]
+  (assoc request :body (parser/read-body request)))
+
 (defn create [conn]
    (-> {:conn conn}
        attach-request-line
-       attach-headers))
+       attach-headers
+       attach-body))

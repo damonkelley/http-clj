@@ -21,6 +21,22 @@
     (with request-log (io/writer @output))
 
     (it "displays the contents of the log"
-        (.write @request-log "message 1\n")
-        (.flush @request-log)
-        (should-contain "message 1\n" (:body (log {} @output))))))
+      (.write @request-log "message 1\n")
+      (.flush @request-log)
+      (should-contain "message 1\n" (:body (log {} @output)))))
+
+  (context "form"
+    (context "submit-form"
+    (it "updates the form"
+      (let [cache (atom "")]
+        (should= 200 (:status (submit-form {:body (.getBytes "submitted=true")} cache)))
+        (should= "submitted=true" @cache))))
+
+    (context "last-submission"
+      (it "displays the content of the last submission"
+        (let [cache (atom "submitted=true")]
+          (should= 200 (:status (last-submission {} cache)))
+          (should= "submitted=true" (:body (last-submission {} cache)))
+
+          (reset! cache "submitted=twice")
+          (should= "submitted=twice" (:body (last-submission {} cache))))))))
