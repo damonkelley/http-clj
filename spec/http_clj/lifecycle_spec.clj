@@ -7,6 +7,7 @@
             [http-clj.logging :as logging]
             [http-clj.connection :as connection]
             [http-clj.lifecycle :refer [write-response
+                                        validate-request
                                         http]])
   (:import java.io.ByteArrayOutputStream))
 
@@ -38,10 +39,32 @@
         (should-contain "Message body" (.toString @output))
         (should-contain "HTTP/1.1 200 OK\r\n" (.toString @output)))))
 
+  (context "validate-request"
+    (it "determines the request is invalid if the method is empty"
+      (let [request {:method "" :path "/" :version "HTTP/1.1"}]
+        (should= (assoc request :valid? false)
+                 (validate-request request))))
+
+    (it "determines the request is invalid if the path is empty"
+      (let [request {:method "GET" :path "" :version "HTTP/1.1"}]
+        (should= (assoc request :valid? false)
+                 (validate-request request))))
+    (it "deems all other requests as valid"
+      (let [request {:method "GET" :path "/" :version "HTTP/1.1"}]
+        (should= (assoc request :valid? true)
+                 (validate-request request)))))
+
   (context "http"
     (it "pushes a request through an application"
       (http @conn @application)
       (should-contain "Message body" (.toString @output)))
+
+    (it "validates requests"
+      (let [invalid-request (-> (GET "" {"User-Agent" "Test Request" "Host" "www.example.com"})
+                                (mock/socket @output)
+                                (connection/create))]
+        (http invalid-request @application)
+        (should-contain "HTTP/1.1 400" (.toString @output))))
 
     (it "logs the request"
       (http @conn @application)
