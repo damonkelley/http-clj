@@ -30,3 +30,9 @@
     routes
     {:path path
      :handlers {"POST" handler}}))
+
+(defn OPTIONS [routes path handler]
+  (helper/update-route
+    routes
+    {:path path
+     :handlers {"OPTIONS" handler}}))

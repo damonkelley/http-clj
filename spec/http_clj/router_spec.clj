@@ -98,15 +98,22 @@
                         (GET #"^/.*$" :first-handler)
                         (GET #"^/.*$" :second-handler)
                         (find-route #"^/.*$")) ]
-          (should= :second-handler (get-in route [:handlers "GET"]))))))
+          (should= :second-handler (get-in route [:handlers "GET"])))))
 
-  (context "POST"
-    (with routes [{:path "/a" :handlers {}}])
+    (context "POST"
+      (with routes [{:path "/a" :handlers {}}])
 
-    (it "appends a route if the path isn't defined"
-      (let [routes (POST @routes "/b" :handler)]
-        (should= {:path "/b" :handlers {"POST" :handler}} (last routes))))
+      (it "appends a route if the path isn't defined"
+        (let [routes (POST @routes "/b" :handler)]
+          (should= {:path "/b" :handlers {"POST" :handler}} (last routes))))
 
-    (it "updates the route if the path is defined"
-      (let [routes (POST @routes "/a" :handler)]
-        (should= {:path "/a" :handlers {"POST" :handler}} (first routes))))))
+      (it "updates the route if the path is defined"
+        (let [routes (POST @routes "/a" :handler)]
+          (should= {:path "/a" :handlers {"POST" :handler}} (first routes)))))
+
+    (context "OPTIONS"
+      (with routes [{:path "/path" :handlers {"POST" :post-handler}}])
+      (it "adds the OPTIONS handler"
+        (let [routes (OPTIONS @routes "/path" :options-handler)]
+          (should= {"POST" :post-handler "OPTIONS" :options-handler}
+                   (:handlers (find-route routes "/path"))))))))
