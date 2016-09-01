@@ -21,5 +21,5 @@
 (defn parse-headers [headers]
   (->> headers
       (map parse-field:value)
-      (into {} )
+      (into {})
       parse-header-fields))

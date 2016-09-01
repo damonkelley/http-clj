@@ -7,19 +7,6 @@
             [http-clj.spec-helper.request-generator :refer [GET POST]]))
 
 (describe "request.parser"
-  (with get-request
-    {:conn  (mock/connection
-              (GET "/file1"
-                   {"Host" "www.example.com" "User-Agent" "Test-request"}))})
-
-  (with post-request
-    {:conn (mock/connection
-             (POST "/file2"
-                   {"Host" "www.example.us"
-                    "User-Agent" "Test-request"
-                    "Content-Length" 8}
-                   "var=data"))})
-
   (context "parse-request-line"
     (it "parses the method"
       (should= "GET" (:method (parser/parse-request-line "GET / HTTP/1.1")))
