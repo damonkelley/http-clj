@@ -4,32 +4,27 @@
             [http-clj.spec-helper.mock :as mock]
             [http-clj.spec-helper.request-generator :refer [POST GET]]))
 
-(describe "request"
-  (with get-conn
-    (mock/connection
-      (GET "/file1"
-           {"Host" "www.example.com" "User-Agent" "Test-request"})))
+(defn test-get-conn []
+  (->> ["/file1" {"Host" "www.example.com" "User-Agent" "Test-request"}]
+        (apply GET)
+        mock/connection))
 
-  (with post-conn
-    (mock/connection
-      (POST "/file2"
-            {"Host" "www.example.us"
-             "User-Agent" "Test-request"
-             "Content-Length" 8}
-            "var=data")))
+(defn test-post-conn []
+  (->> ["/file2" {"Host" "www.example.us" "Content-Length" 8} "var=data"]
+       (apply POST)
+       mock/connection))
+
+(describe "request"
+  (with get-conn (test-get-conn))
+  (with post-conn (test-post-conn))
 
   (context "get-request-line"
-    (it "parses the method"
-      (should= "GET" (:method (request/get-request-line {:conn @get-conn})))
-      (should= "POST" (:method (request/get-request-line {:conn @post-conn}))))
+    (it "parses the request-line"
+      (should= {:method "GET" :path "/file1" :version "HTTP/1.1"}
+               (request/get-request-line {:conn @get-conn}))
 
-    (it "parses the path"
-      (should= "/file1" (:path (request/get-request-line {:conn @get-conn})))
-      (should= "/file2" (:path (request/get-request-line {:conn @post-conn}))))
-
-    (it "parses the version"
-      (should= "HTTP/1.1" (:version (request/get-request-line {:conn @get-conn})))
-      (should= "HTTP/1.1" (:version (request/get-request-line {:conn @post-conn})))))
+      (should= {:method "POST" :path "/file2" :version "HTTP/1.1"}
+               (request/get-request-line {:conn @post-conn}))))
 
   (context "get-headers"
     (before (request/get-request-line  {:conn @get-conn}))
@@ -37,12 +32,10 @@
 
     (it "reads the headers from the connection into a map"
       (should= {"Host" "www.example.com" "User-Agent" "Test-request"}
-               (request/get-headers {:conn @get-conn})))
+               (request/get-headers {:conn @get-conn}))
 
-    (it "parses the header field values"
-      (let [headers (request/get-headers {:conn @post-conn})]
-        (should= 8 (get headers "Content-Length")))))
-
+      (should= {"Host" "www.example.us" "Content-Length" 8}
+               (request/get-headers {:conn @post-conn}))))
 
   (context "when created"
     (it "has the connection"
