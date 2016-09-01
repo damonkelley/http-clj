@@ -1,4 +1,4 @@
-(ns http-clj.lifecycle
+(ns http-clj.protocol
   (:require [http-clj.request :as request]
             [http-clj.response :as response]
             [http-clj.connection :as connection]

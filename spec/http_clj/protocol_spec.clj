@@ -1,11 +1,11 @@
-(ns http-clj.lifecycle-spec
+(ns http-clj.protocol-spec
   (:require [speclj.core :refer :all]
             [http-clj.spec-helper.mock :as mock]
             [http-clj.response :as response]
             [http-clj.spec-helper.request-generator :refer [GET]]
             [http-clj.logging :as logging]
             [http-clj.connection :as connection]
-            [http-clj.lifecycle :refer [http]])
+            [http-clj.protocol :refer [http]])
   (:import java.io.ByteArrayOutputStream))
 
 (def test-log (atom []))
@@ -19,7 +19,7 @@
   (should= "GET" (:method request))
   (response/create request "Message body"))
 
-(describe "the connection lifecycle"
+(describe "protocol"
   (with output (ByteArrayOutputStream.))
   (with conn
     (-> (GET "/path" {"User-Agent" "Test Request" "Host" "www.example.com"})
