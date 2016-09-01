@@ -34,12 +34,13 @@
       (should= "HTTP/1.1" (:version (request/create @get-conn)))
       (should= "HTTP/1.1" (:version (request/create @post-conn))))
 
-    (it "has headers"
-      (should= "www.example.com"
-               (get-in (request/create @get-conn) [:headers "Host"]))
-      (should= "www.example.us"
-               (get-in (request/create @post-conn) [:headers "Host"])))
+    (it "has the headers"
+      (let [request (request/create @get-conn)]
+        (should= "www.example.com" (get-in request [:headers "Host"])))
 
-    (it "has a body"
+      (let [request (request/create @post-conn)]
+        (should= 8 (get-in request [:headers "Content-Length"]))))
+
+    (it "has the body"
       (should= nil (:body (request/create @get-conn)))
       (should= "var=data" (String. (:body (request/create @post-conn)))))))

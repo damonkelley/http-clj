@@ -31,18 +31,33 @@
        split-request-line
        (zipmap [:method :path :version])))
 
-(defn- parse-header [header]
+(defn- parse-field:value [header]
   (let [[field-name field-value] (string/split header #":")]
     {(string/trim field-name)
      (string/trim field-value)}))
 
+(defn read-headers
+  ([request] (read-headers request []))
+  ([request headers]
+   (let [header (readline (:conn request))]
+     (if (empty? header)
+       headers
+       (recur request (conj headers header))))))
+
+(defn parse-headers [headers]
+  (into {} (map parse-field:value headers)))
+
+(defn parse-header-fields [headers]
+  (if-let [content-length (get headers "Content-Length")]
+    (update headers "Content-Length" #(Integer/parseInt %))
+    headers))
+
 (defn headers [request]
-  (loop [conn (:conn request) headers {}]
-    (let [header (readline conn)]
-      (if (empty? header)
-        headers
-        (recur conn (merge headers (parse-header header)))))))
+  (-> request
+      read-headers
+      parse-headers
+      parse-header-fields))
 
 (defn read-body [{:keys [headers conn]}]
   (if-let [content-length (get headers "Content-Length")]
-    (connection/read-bytes conn (Integer/parseInt content-length))))
+    (connection/read-bytes conn content-length)))
