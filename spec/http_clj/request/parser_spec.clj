@@ -33,28 +33,20 @@
       (should= "HTTP/1.1" (:version (parser/parse-request-line "GET / HTTP/1.1")))
       (should= "HTTP/1.0" (:version (parser/parse-request-line "GET / HTTP/1.0")))))
 
+  (context "parse-headers"
+    (it "returns an empty map if there are no headers"
+      (should= {} (parser/parse-headers [])))
 
-  (context "headers"
-    (before (reader/readline @get-request))
-    (before (reader/readline @post-request))
-
-    (it "reads the headers from the connection into a map"
+    (it "parses the header lines into key-value pairs"
       (should= {"Host" "www.example.com" "User-Agent" "Test-request"}
-               (parser/headers @get-request)))
+               (parser/parse-headers ["Host: www.example.com" "User-Agent: Test-request"])))
 
     (it "parses the header field values"
-         (let [headers (parser/headers @post-request)]
-           (should= 8 (get headers "Content-Length"))))
+      (should= {"Content-Length" 10}
+               (parser/parse-headers ["Content-Length: 10"]))))
 
-    (context "parse-headers"
-      (it "returns an empty map if there are no headers"
-        (should= {} (parser/parse-headers [])))
-      (it "parses the header lines into key-value pairs"
-        (should= {"Host" "www.example.com" "Content-Length" "8"}
-                 (parser/parse-headers ["Host: www.example.com" "Content-Length: 8"]))))
-
-    (context "parse-header-fields"
-        (it "parses Content-Length"
-          (should= {"Content-Length" 9} (parser/parse-header-fields {"Content-Length" "9"}))
-          (should= {"Content-Length" 10 "Host" "www.example.com"}
-                   (parser/parse-header-fields {"Content-Length" "10" "Host" "www.example.com"}))))))
+  (context "parse-header-fields"
+    (it "parses Content-Length"
+      (should= {"Content-Length" 9} (parser/parse-header-fields {"Content-Length" "9"}))
+      (should= {"Content-Length" 10 "Host" "www.example.com"}
+               (parser/parse-header-fields {"Content-Length" "10" "Host" "www.example.com"})))))

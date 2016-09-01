@@ -31,6 +31,19 @@
       (should= "HTTP/1.1" (:version (request/get-request-line {:conn @get-conn})))
       (should= "HTTP/1.1" (:version (request/get-request-line {:conn @post-conn})))))
 
+  (context "get-headers"
+    (before (request/get-request-line  {:conn @get-conn}))
+    (before (request/get-request-line {:conn @post-conn}))
+
+    (it "reads the headers from the connection into a map"
+      (should= {"Host" "www.example.com" "User-Agent" "Test-request"}
+               (request/get-headers {:conn @get-conn})))
+
+    (it "parses the header field values"
+      (let [headers (request/get-headers {:conn @post-conn})]
+        (should= 8 (get headers "Content-Length")))))
+
+
   (context "when created"
     (it "has the connection"
       (should= @get-conn (:conn (request/create @get-conn))))

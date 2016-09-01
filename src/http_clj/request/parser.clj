@@ -13,16 +13,13 @@
     {(string/trim field-name)
      (string/trim field-value)}))
 
-(defn parse-headers [headers]
-  (into {} (map parse-field:value headers)))
-
 (defn parse-header-fields [headers]
   (if-let [content-length (get headers "Content-Length")]
     (update headers "Content-Length" #(Integer/parseInt %))
     headers))
 
-(defn headers [request]
-  (-> request
-      reader/read-headers
-      parse-headers
+(defn parse-headers [headers]
+  (->> headers
+      (map parse-field:value)
+      (into {} )
       parse-header-fields))

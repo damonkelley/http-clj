@@ -10,11 +10,16 @@
        reader/readline
        parser/parse-request-line))
 
+(defn get-headers [request]
+  (-> request
+      reader/read-headers
+      parser/parse-headers))
+
 (defn- attach-request-line [request]
   (merge request (get-request-line request)))
 
 (defn- attach-headers [request]
-  (assoc request :headers (parser/headers request)))
+  (assoc request :headers (get-headers request)))
 
 (defn- attach-body [request]
   (assoc request :body (reader/read-body request)))

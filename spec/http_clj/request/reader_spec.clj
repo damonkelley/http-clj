@@ -43,11 +43,11 @@
     (it "is nil if the there is not body to read"
       (let [request (-> @get-request
                         (merge  (request/get-request-line @get-request))
-                        (assoc :headers (parser/headers @get-request)))]
+                        (assoc :headers (request/get-headers @get-request)))]
         (should= nil (reader/read-body request))))
 
     (it "returns the body if present"
       (let [request (-> @post-request
                         (merge  (request/get-request-line @post-request))
-                        (assoc :headers (parser/headers@post-request)))]
+                        (assoc :headers (request/get-headers @post-request)))]
         (should= "var=data" (String. (reader/read-body request)))))))
