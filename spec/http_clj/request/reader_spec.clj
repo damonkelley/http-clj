@@ -1,25 +1,10 @@
 (ns http-clj.request.reader-spec
   (:require [speclj.core :refer :all]
-            [http-clj.request :as request]
             [http-clj.request.reader :as reader]
             [http-clj.request.parser :as parser]
-            [http-clj.spec-helper.mock :as mock]
-            [http-clj.spec-helper.request-generator :refer [GET POST]]))
+            [http-clj.spec-helper.mock :as mock]))
 
 (describe "request.reader"
-  (with get-request
-    {:conn  (mock/connection
-              (GET "/file1"
-                   {"Host" "www.example.com" "User-Agent" "Test-request"}))})
-
-  (with post-request
-    {:conn (mock/connection
-             (POST "/file2"
-                   {"Host" "www.example.us"
-                    "User-Agent" "Test-request"
-                    "Content-Length" 8}
-                   "var=data"))})
-
   (context "readline"
     (it "reads line delimited by newline characters"
       (let [conn (mock/connection "one\ntwo")]
@@ -32,22 +17,26 @@
         (should= "two" (reader/readline {:conn conn})))))
 
   (context "read-headers"
-    (before (reader/readline @get-request))
-    (before (reader/readline @post-request))
+    (it "returns an empty list if there are no headers"
+      (let [conn (mock/connection (str "\r\n"
+                                       "Body"))]
+        (should= [] (reader/read-headers {:conn conn}))))
 
-      (it "reads the headers into a list"
-        (should= ["Host: www.example.com" "User-Agent: Test-request"]
-                 (reader/read-headers @get-request))))
+    (it "reads the headers into a list"
+      (let [conn (mock/connection (str "Host: www.example.com\r\n"
+                                       "User-Agent: Test-request\r\n"
+                                       "\r\n"
+                                       "Body"))]
+      (should= ["Host: www.example.com" "User-Agent: Test-request"]
+               (reader/read-headers {:conn conn})))))
 
   (context "read-body"
     (it "is nil if the there is not body to read"
-      (let [request (-> @get-request
-                        (merge  (request/get-request-line @get-request))
-                        (assoc :headers (request/get-headers @get-request)))]
+      (let [request {:conn (mock/connection "")
+                     :headers {}}]
         (should= nil (reader/read-body request))))
 
     (it "returns the body if present"
-      (let [request (-> @post-request
-                        (merge  (request/get-request-line @post-request))
-                        (assoc :headers (request/get-headers @post-request)))]
-        (should= "var=data" (String. (reader/read-body request)))))))
+      (let [request {:conn (mock/connection "body to read")
+                     :headers {"Content-Length" (alength (.getBytes "body to read"))}}]
+        (should= "body to read" (String. (reader/read-body request)))))))
