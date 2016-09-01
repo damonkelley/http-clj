@@ -14,11 +14,6 @@
   (logging/log logger :info (str method " " path " " version))
   request)
 
-(defn validate-request [{:keys [method path] :as request}]
-  (if (some empty? [method path])
-    (assoc request :valid? false)
-    (assoc request :valid? true)))
-
 (defn- guard [request entrypoint]
   (if (:valid? request)
     (entrypoint request)
@@ -28,6 +23,5 @@
     (-> conn
         create
         (log-request logger)
-        validate-request
         (guard entrypoint)
         write-response))

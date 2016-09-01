@@ -1,7 +1,8 @@
 (ns http-clj.request
   (:require [clojure.string :as string]
             [http-clj.request.parser :as parser]
-            [http-clj.request.reader :as reader]))
+            [http-clj.request.reader :as reader]
+            [http-clj.request.validator :as validator]))
 
 (defn get-request-line [request]
   (->> request
@@ -26,4 +27,5 @@
    (-> {:conn conn}
        attach-request-line
        attach-headers
-       attach-body))
+       attach-body
+       validator/validate))
