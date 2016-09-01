@@ -18,6 +18,19 @@
              "Content-Length" 8}
             "var=data")))
 
+  (context "get-request-line"
+    (it "parses the method"
+      (should= "GET" (:method (request/get-request-line {:conn @get-conn})))
+      (should= "POST" (:method (request/get-request-line {:conn @post-conn}))))
+
+    (it "parses the path"
+      (should= "/file1" (:path (request/get-request-line {:conn @get-conn})))
+      (should= "/file2" (:path (request/get-request-line {:conn @post-conn}))))
+
+    (it "parses the version"
+      (should= "HTTP/1.1" (:version (request/get-request-line {:conn @get-conn})))
+      (should= "HTTP/1.1" (:version (request/get-request-line {:conn @post-conn})))))
+
   (context "when created"
     (it "has the connection"
       (should= @get-conn (:conn (request/create @get-conn))))
