@@ -1,5 +1,6 @@
 (ns http-clj.response
-  (:require [clojure.string :as string]))
+  (:require [clojure.string :as string]
+            [http-clj.connection :as connection]))
 
 (defn create [request body & {:keys [status headers]
                               :or {status 200
@@ -44,3 +45,9 @@
 (defn compose [resp]
   (let [{status :status headers :headers body :body} resp]
     (assoc resp :message (generate-message status headers body))))
+
+(defn write [resp]
+  (->> resp
+      compose
+      :message
+      (connection/write (:conn resp))))

@@ -1,13 +1,11 @@
 (ns http-clj.lifecycle-spec
   (:require [speclj.core :refer :all]
             [http-clj.spec-helper.mock :as mock]
-            [http-clj.request :as request]
             [http-clj.response :as response]
             [http-clj.spec-helper.request-generator :refer [GET]]
             [http-clj.logging :as logging]
             [http-clj.connection :as connection]
-            [http-clj.lifecycle :refer [write-response
-                                        http]])
+            [http-clj.lifecycle :refer [http]])
   (:import java.io.ByteArrayOutputStream))
 
 (def test-log (atom []))
@@ -29,14 +27,6 @@
         (connection/create)))
   (with application {:entrypoint test-app
                      :logger (->TestLogger)})
-
-  (context "write-response"
-    (it "writes the HTTP message to the connection"
-      (let [conn (write-response {:body "Message body"
-                                  :status 200
-                                  :conn @conn})]
-        (should-contain "Message body" (.toString @output))
-        (should-contain "HTTP/1.1 200 OK\r\n" (.toString @output)))))
 
   (context "http"
     (it "pushes a request through an application"

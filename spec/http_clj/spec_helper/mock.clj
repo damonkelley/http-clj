@@ -37,10 +37,10 @@
         @closed?))))
 
 (defn connection
-  ([]
-   (connection ""))
-  ([input]
-   (connection/create (socket input (ByteArrayOutputStream.)))))
+  ([] (connection ""))
+  ([input] (connection input (ByteArrayOutputStream.)))
+  ([input output]
+   (connection/create (socket input output))))
 
 (defrecord MockServer [started stopped]
   component/Lifecycle
