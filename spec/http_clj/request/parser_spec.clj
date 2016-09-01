@@ -8,17 +8,14 @@
 
 (describe "request.parser"
   (context "parse-request-line"
-    (it "parses the method"
-      (should= "GET" (:method (parser/parse-request-line "GET / HTTP/1.1")))
-      (should= "POST" (:method (parser/parse-request-line "POST / HTTP/1.1"))))
+    (it "parses the request line into a map"
+      (should= {:method "GET" :path "/" :version "HTTP/1.1"}
+               (parser/parse-request-line "GET / HTTP/1.1"))
+      (should= {:method "POST" :path "/file" :version "HTTP/1.0"}
+               (parser/parse-request-line "POST /file HTTP/1.0")))
 
-    (it "parses the path"
-      (should= "/file1" (:path (parser/parse-request-line "GET /file1 HTTP/1.1")))
-      (should= "/file2" (:path (parser/parse-request-line "GET /file2 HTTP/1.1"))))
-
-    (it "parses the version"
-      (should= "HTTP/1.1" (:version (parser/parse-request-line "GET / HTTP/1.1")))
-      (should= "HTTP/1.0" (:version (parser/parse-request-line "GET / HTTP/1.0")))))
+    (it "always has path version and method keys"
+      (should= {:method "" :path "" :version ""} (parser/parse-request-line ""))))
 
   (context "parse-headers"
     (it "returns an empty map if there are no headers"

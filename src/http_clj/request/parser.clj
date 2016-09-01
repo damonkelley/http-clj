@@ -3,10 +3,13 @@
             [http-clj.request.reader :as reader]
             [clojure.string :as string]))
 
+(defn- split-request-line [line]
+  (take 3 (concat (string/split line #" ") (repeat ""))))
+
 (defn parse-request-line [request-line]
-  (-> request-line
-      (string/split #" ")
-      (#(zipmap [:method :path :version] %))))
+  (->> request-line
+      split-request-line
+      (zipmap [:method :path :version])))
 
 (defn- parse-field:value [header]
   (let [[field-name field-value] (string/split header #":")]
