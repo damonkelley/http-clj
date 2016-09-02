@@ -3,7 +3,7 @@
             [http-clj.server :as s]
             [http-clj.connection :as connection]
             [http-clj.response :as response]
-            [http-clj.lifecycle :as lifecycle]
+            [http-clj.protocol :as protocol]
             [http-clj.spec-helper.mock :as mock]
             [http-clj.logging :as logging]
             [com.stuartsierra.component :as component])
@@ -45,8 +45,8 @@
   (with server (mock/server))
   (with application {:entrypoint test-app
                      :logger (->DegenerateLogger)})
-  (it "kicks off the request/response lifecycle"
-    (should-invoke lifecycle/http {:times 1 :return (mock/connection)}
+  (it "dispatches to http"
+    (should-invoke protocol/http {:times 1 :return (mock/connection)}
                    (s/listen @server @application)))
 
   (it "closes the connection"

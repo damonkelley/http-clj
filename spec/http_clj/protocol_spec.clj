@@ -1,13 +1,11 @@
-(ns http-clj.lifecycle-spec
+(ns http-clj.protocol-spec
   (:require [speclj.core :refer :all]
             [http-clj.spec-helper.mock :as mock]
-            [http-clj.request :as request]
             [http-clj.response :as response]
             [http-clj.spec-helper.request-generator :refer [GET]]
             [http-clj.logging :as logging]
             [http-clj.connection :as connection]
-            [http-clj.lifecycle :refer [write-response
-                                        http]])
+            [http-clj.protocol :refer [http]])
   (:import java.io.ByteArrayOutputStream))
 
 (def test-log (atom []))
@@ -21,7 +19,7 @@
   (should= "GET" (:method request))
   (response/create request "Message body"))
 
-(describe "the connection lifecycle"
+(describe "protocol"
   (with output (ByteArrayOutputStream.))
   (with conn
     (-> (GET "/path" {"User-Agent" "Test Request" "Host" "www.example.com"})
@@ -30,18 +28,17 @@
   (with application {:entrypoint test-app
                      :logger (->TestLogger)})
 
-  (context "write-response"
-    (it "writes the HTTP message to the connection"
-      (let [conn (write-response {:body "Message body"
-                                  :status 200
-                                  :conn @conn})]
-        (should-contain "Message body" (.toString @output))
-        (should-contain "HTTP/1.1 200 OK\r\n" (.toString @output)))))
-
   (context "http"
     (it "pushes a request through an application"
       (http @conn @application)
       (should-contain "Message body" (.toString @output)))
+
+    (it "validates requests"
+      (let [invalid-request (-> (GET "" {"User-Agent" "Test Request" "Host" "www.example.com"})
+                                (mock/socket @output)
+                                (connection/create))]
+        (http invalid-request @application)
+        (should-contain "HTTP/1.1 400" (.toString @output))))
 
     (it "logs the request"
       (http @conn @application)

@@ -62,4 +62,8 @@
 
     (it "has the body"
       (should= nil (:body (request/create @get-conn)))
-      (should= "var=data" (String. (:body (request/create @post-conn)))))))
+      (should= "var=data" (String. (:body (request/create @post-conn)))))
+
+    (it "validates the request"
+      (should= true (:valid? (request/create @get-conn)))
+      (should= false (:valid? (request/create (mock/connection "")))))))

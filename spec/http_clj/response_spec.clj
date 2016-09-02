@@ -1,9 +1,10 @@
 (ns http-clj.response-spec
   (:require [speclj.core :refer :all]
-            [http-clj.response :refer [create compose]]
+            [http-clj.response :refer :all]
             [http-clj.spec-helper.mock :refer [connection]]
             [http-clj.spec-helper.request-generator :refer [GET]]
-            [clojure.string :as string]))
+            [clojure.string :as string])
+  (:import java.io.ByteArrayOutputStream))
 
 (defn byte-array->string [array]
   (String. array))
@@ -74,4 +75,13 @@
     (it "has a status line for a GET request"
       (let [response (create @request "" :status 404)
             {message :message} (compose response)]
-        (should= "HTTP/1.1 404 Not Found" (get-status-line message))))))
+        (should= "HTTP/1.1 404 Not Found" (get-status-line message)))))
+
+  (context "write"
+    (it "writes the HTTP message to the connection"
+      (let [output (ByteArrayOutputStream.)
+            conn (write {:body "Message body"
+                                  :status 200
+                                  :conn (connection "" output)})]
+        (should-contain "Message body" (.toString output))
+        (should-contain "HTTP/1.1 200 OK\r\n" (.toString output))))))
