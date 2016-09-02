@@ -8,21 +8,31 @@
 
 (defn parse-request-line [request-line]
   (->> request-line
-      split-request-line
-      (zipmap [:method :path :version])))
+       split-request-line
+       (zipmap [:method :path :version])))
 
-(defn- parse-field:value [header]
-  (let [[field-name field-value] (string/split header #":")]
-    {(string/trim field-name)
-     (string/trim field-value)}))
+(defn- lower-case-field-name [[field-name field-value]]
+  [(string/lower-case field-name) field-value])
 
-(defn parse-header-fields [headers]
-  (if-let [content-length (get headers "Content-Length")]
-    (update headers "Content-Length" #(Integer/parseInt %))
+(defn- field-name->keyword [[field-name field-value]]
+  [(keyword field-name) field-value])
+
+(defn- split-header [header]
+  (map string/trim (string/split header #":")))
+
+(defn- parse-field-name:field-value [header]
+  (-> header
+      split-header
+      lower-case-field-name
+      field-name->keyword))
+
+(defn parse-field-values [headers]
+  (if-let [content-length (get headers :content-length)]
+    (update headers :content-length #(Integer/parseInt %))
     headers))
 
 (defn parse-headers [headers]
   (->> headers
-      (map parse-field:value)
-      (into {})
-      parse-header-fields))
+       (map parse-field-name:field-value)
+       (into {})
+       parse-field-values))

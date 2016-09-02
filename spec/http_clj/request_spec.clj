@@ -31,10 +31,10 @@
     (before (request/get-request-line {:conn @post-conn}))
 
     (it "reads the headers from the connection into a map"
-      (should= {"Host" "www.example.com" "User-Agent" "Test-request"}
+      (should= {:host "www.example.com" :user-agent "Test-request"}
                (request/get-headers {:conn @get-conn}))
 
-      (should= {"Host" "www.example.us" "Content-Length" 8}
+      (should= {:host "www.example.us" :content-length 8}
                (request/get-headers {:conn @post-conn}))))
 
   (context "when created"
@@ -55,10 +55,10 @@
 
     (it "has the headers"
       (let [request (request/create @get-conn)]
-        (should= "www.example.com" (get-in request [:headers "Host"])))
+        (should= "www.example.com" (get-in request [:headers :host])))
 
       (let [request (request/create @post-conn)]
-        (should= 8 (get-in request [:headers "Content-Length"]))))
+        (should= 8 (get-in request [:headers :content-length]))))
 
     (it "has the body"
       (should= nil (:body (request/create @get-conn)))
