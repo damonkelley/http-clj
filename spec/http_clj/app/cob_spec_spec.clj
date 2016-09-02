@@ -31,6 +31,9 @@
   (client/post (str root path) {:form-params data
                                 :throw-exceptions false}))
 
+(defn OPTIONS [path]
+  (client/options (str root path) {:throw-exceptions false}))
+
 (def thread (atom nil))
 
 (describe "cob-spec"
@@ -53,4 +56,12 @@
       (should= 200 status))
     (should-contain "form-data=true" (:body (GET "/form")))
     (POST "/form" {:new-form-data true})
-    (should-contain "new-form-data=true" (:body (GET "/form")))))
+    (should-contain "new-form-data=true" (:body (GET "/form"))))
+
+  (it "shows the options at /method_options"
+    (let [headers (:headers (OPTIONS "/method_options"))]
+      (should= "GET,HEAD,POST,OPTIONS,PUT"(get headers "Allow"))))
+
+  (it "shows the options at /method_options2"
+    (let [headers (:headers (OPTIONS "/method_options2"))]
+      (should= "GET,OPTIONS"(get headers "Allow")))))

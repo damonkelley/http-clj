@@ -1,5 +1,5 @@
 (ns http-clj.app.cob-spec
-  (:require [http-clj.router :refer [route GET POST]]
+  (:require [http-clj.router :refer [route GET POST OPTIONS]]
             [http-clj.server :refer [run]]
             [http-clj.app.cob-spec.handlers :as handlers]
             [http-clj.app.cob-spec.cli :as cli]
@@ -18,6 +18,8 @@
        (GET "/log" #(handlers/log % log))
        (POST "/form" #(handlers/submit-form % form-cache))
        (GET "/form" #(handlers/last-submission % form-cache))
+       (OPTIONS "/method_options" (handlers/options "GET" "HEAD" "POST" "OPTIONS" "PUT"))
+       (OPTIONS "/method_options2" (handlers/options "GET" "OPTIONS"))
        (GET #"^/.*$" #(handlers/static % directory)))))
 
 (defn app [directory]
