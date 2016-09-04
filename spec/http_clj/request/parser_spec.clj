@@ -7,6 +7,7 @@
             [http-clj.spec-helper.request-generator :refer [GET POST]]))
 
 (describe "request.parser"
+  (tags "parser")
   (context "parse-request-line"
     (it "parses the request line into a map"
       (should= {:method "GET" :path "/" :version "HTTP/1.1"}
@@ -22,15 +23,15 @@
       (should= {} (parser/parse-headers [])))
 
     (it "parses the header lines into key-value pairs"
-      (should= {"Host" "www.example.com" "User-Agent" "Test-request"}
+      (should= {:host "www.example.com" :user-agent "Test-request"}
                (parser/parse-headers ["Host: www.example.com" "User-Agent: Test-request"])))
 
     (it "parses the header field values"
-      (should= {"Content-Length" 10}
+      (should= {:content-length 10}
                (parser/parse-headers ["Content-Length: 10"]))))
 
-  (context "parse-header-fields"
+  (context "parse-field-values"
     (it "parses Content-Length"
-      (should= {"Content-Length" 9} (parser/parse-header-fields {"Content-Length" "9"}))
-      (should= {"Content-Length" 10 "Host" "www.example.com"}
-               (parser/parse-header-fields {"Content-Length" "10" "Host" "www.example.com"})))))
+      (should= {:content-length 9} (parser/parse-field-values {:content-length "9"}))
+      (should= {:content-length 10 :host "www.example.com"}
+               (parser/parse-field-values {:content-length "10" :host "www.example.com"})))))

@@ -29,5 +29,5 @@
        (recur request (conj headers header))))))
 
 (defn read-body [{:keys [headers conn]}]
-  (if-let [content-length (get headers "Content-Length")]
+  (if-let [content-length (get headers :content-length)]
     (connection/read-bytes conn content-length)))

@@ -38,5 +38,5 @@
 
     (it "returns the body if present"
       (let [request {:conn (mock/connection "body to read")
-                     :headers {"Content-Length" (alength (.getBytes "body to read"))}}]
+                     :headers {:content-length (alength (.getBytes "body to read"))}}]
         (should= "body to read" (String. (reader/read-body request)))))))
