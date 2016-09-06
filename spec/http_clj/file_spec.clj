@@ -14,6 +14,17 @@
       (should= (seq (.getBytes @contents))
                (seq (file/binary-slurp @test-path)))))
 
+  (context "binary-slurp-range"
+    (before (spit @test-path "Read a range of bytes"))
+
+    (it "can read the first 4 bytes of a file"
+      (let [byte-range (file/binary-slurp-range @test-path 0 3)]
+        (should= "Read" (String. byte-range))))
+
+    (it "can read bytes 1 through 4 of the file"
+      (let [byte-range (file/binary-slurp-range @test-path 1 4)]
+        (should= "ead " (String. byte-range)))))
+
   (context "file-helper"
     (it "takes two paths"
       (file/resolve "resources/static" "image.gif"))
