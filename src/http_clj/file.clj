@@ -25,14 +25,23 @@
         start (inc (- size end))]
     (binary-slurp-range path start size)))
 
-(defmethod binary-slurp-range [Number Number]
-  [path start end]
+(defn- -binary-slurp-range [path start end]
   (let [buffer-size (inc (- end start))
         buffer (byte-array buffer-size)]
     (with-open [stream (io/input-stream path)]
       (.skip stream start)
       (.read stream buffer))
     buffer))
+
+(defn- valid-range? [path start end]
+  (let [size (-> (File. path) .length dec)]
+    (and (<= start size) (<= end size))))
+
+(defmethod binary-slurp-range [Number Number]
+  [path start end]
+  (when (not (valid-range? path start end))
+    (throw (ex-info "Range Unsatisfiable" {:cause :unsatisfiable})))
+  (-binary-slurp-range path start end))
 
 (defn resolve [root-dir path]
   (-> (Paths/get root-dir (into-array [path]))

@@ -3,6 +3,7 @@
             [http-clj.file :as file]))
 
 (describe "file"
+  (tags "file")
   (with test-path "/tmp/http-clj-test-file")
   (before (spit @test-path ""))
 
@@ -31,7 +32,11 @@
 
     (it "reads the last n bytes when end is nil"
       (let [byte-range (file/binary-slurp-range @test-path 5 nil)]
-        (should= "a range of bytes" (String. byte-range)))))
+        (should= "a range of bytes" (String. byte-range))))
+
+    (it "raises an exception if offset is outside of the length of the file"
+      (should-throw clojure.lang.ExceptionInfo
+                    (file/binary-slurp-range @test-path 0 5000))))
 
   (context "file-helper"
     (it "takes two paths"
