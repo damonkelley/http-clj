@@ -111,8 +111,17 @@
         (let [routes (POST @routes "/a" :handler)]
           (should= {:path "/a" :handlers {"POST" :handler}} (first routes)))))
 
+    (context "PATCH"
+      (with routes [{:path "/path" :handlers {"GET" :get-handler}}])
+
+      (it "adds the PATCH handler"
+        (let [routes (PATCH @routes "/path" :patch-handler)]
+          (should= {"PATCH" :patch-handler "GET" :get-handler}
+                   (:handlers (find-route routes "/path"))))))
+
     (context "OPTIONS"
       (with routes [{:path "/path" :handlers {"POST" :post-handler}}])
+
       (it "adds the OPTIONS handler"
         (let [routes (OPTIONS @routes "/path" :options-handler)]
           (should= {"POST" :post-handler "OPTIONS" :options-handler}
