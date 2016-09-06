@@ -3,6 +3,7 @@
             [http-clj.request-handler.filesystem :as handler]
             [http-clj.response :as response]
             [hiccup.core :refer [html]]
+            [digest :refer [sha1]]
             [clojure.java.io :as io])
   (:import java.io.File))
 
@@ -35,7 +36,7 @@
   (describe "file handlers"
     (with test-path "/tmp/http-clj-test-file-handler")
     (with test-data "Some content")
-    (before-all (spit @test-path @test-data))
+    (before (spit @test-path @test-data))
 
     (context "partial-file"
       (it "responds with a 206 if a range is provided"
@@ -51,10 +52,42 @@
         (let [request {:headers {:range {:start 1 :end 3}}}
               resp (handler/partial-file request @test-path)]
           (should= "ome" (String. (:body resp)))))
+
       (it "responds with a 416 if the range is not satisfiable"
         (let [request {:headers {:range {:start 1 :end 500}}}
               resp (handler/partial-file request @test-path)]
           (should= 416 (:status resp)))))
+
+    (context "patch-file"
+      (with request {:body (.getBytes "New content")})
+
+      (it "responds with 204 when successful"
+        (let [resp (handler/patch-file @request  @test-path)]
+          (should= 204 (:status resp))))
+
+      (it "has no body"
+        (let [resp (handler/patch-file @request @test-path)]
+          (should= "" (:body resp))))
+
+      (it "updates the contents of the file"
+        (let [resp (handler/patch-file @request @test-path)]
+          (should= "New content" (slurp @test-path))))
+
+      (it "updates the contents of the file if the when the precondition is true"
+        (let [request (assoc-in @request [:headers :if-match] (sha1 @test-data))
+              resp (handler/patch-file request @test-path)]
+          (should= "New content" (slurp @test-path))))
+
+      (it "responds with 409 when the precondition fails"
+        (let [request (assoc-in @request [:headers :if-match] "abcdef09")
+              resp (handler/patch-file request @test-path)]
+          (should= 409 (:status resp))
+          (should= @test-data (slurp @test-path))))
+
+      (it "does not modify the file when the precondition fails"
+        (let [request (assoc-in @request [:headers :if-match] "abcdef09")
+              resp (handler/patch-file request @test-path)]
+          (should= @test-data (slurp @test-path)))))
 
     (context "file"
       (it "can accept a request and a file object"

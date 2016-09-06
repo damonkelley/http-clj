@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/tools.cli "0.3.5"]
                  [org.clojure/data.codec "0.1.0"]
+                 [digest "1.4.4"]
                  [com.stuartsierra/component  "0.3.1"]
                  [clj-http "2.2.0"]
                  [com.taoensso/timbre "4.7.4"]

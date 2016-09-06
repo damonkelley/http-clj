@@ -38,7 +38,7 @@
       (should-throw clojure.lang.ExceptionInfo
                     (file/binary-slurp-range @test-path 0 5000))))
 
-  (context "file-helper"
+  (context "resolve"
     (it "takes two paths"
       (file/resolve "resources/static" "image.gif"))
 
