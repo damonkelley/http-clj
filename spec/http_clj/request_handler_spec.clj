@@ -3,6 +3,7 @@
             [http-clj.request-handler :as handler]
             [http-clj.response :as response]
             [clojure.java.io :as io]
+            [clojure.data.codec.base64 :as b64]
             [hiccup.core :refer [html]])
   (:import java.io.File))
 
@@ -20,7 +21,7 @@
   (context "directory"
     (it "has a text/html content type"
       (let [{headers :headers} (handler/directory {:path "/"} (mock-directory))]
-      (should= "text/html" (get headers "Content-Type"))))
+        (should= "text/html" (get headers "Content-Type"))))
 
     (it "lists the contents of the directory"
       (let [{body :body} (handler/directory {:path "/"} (mock-directory))]
@@ -28,9 +29,9 @@
         (should-contain (html [:a {:href "/file-b"} "file-b"]) body)
         (should-contain (html [:a {:href "/subdirectory"} "subdirectory"]) body))))
 
-    (it "paths to the files are relative to the request path"
-      (let [{body :body} (handler/directory {:path "/dir"} (mock-directory))]
-        (should-contain (html [:a {:href "/dir/file-a"} "file-a"]) body)))
+  (it "paths to the files are relative to the request path"
+    (let [{body :body} (handler/directory {:path "/dir"} (mock-directory))]
+      (should-contain (html [:a {:href "/dir/file-a"} "file-a"]) body)))
 
   (context "not-found"
     (it "responds with status code 404"
@@ -63,15 +64,36 @@
     (it "returns a resp with the body stripped out"
       (let [handler #(response/create % "Body" :status 200)
             resp (handler/head handler {})]
-      (should= nil (:body resp))))
+        (should= nil (:body resp))))
 
     (it "keeps the headers"
       (let [handler #(response/create % "Body" :headers {"Host" "www.example.com"})
             resp (handler/head handler {})]
-      (should= {"Host" "www.example.com"} (:headers resp))
-      (should= 200 (:status resp)))))
+        (should= {"Host" "www.example.com"} (:headers resp))
+        (should= 200 (:status resp))))
 
-  (it "keeps the status"
-    (let [handler #(response/create % "Body" :status 201 :headers {"User-Agent" "test-agent"})
-          resp (handler/head handler {})]
-      (should= {"User-Agent" "test-agent"} (:headers resp)))))
+    (it "keeps the status"
+      (let [handler #(response/create % "Body" :status 201 :headers {"User-Agent" "test-agent"})
+            resp (handler/head handler {})]
+        (should= {"User-Agent" "test-agent"} (:headers resp)))))
+
+  (context "auth"
+    (with handler #(response/create % "Welcome"))
+
+    (it "returns a 401 if the credentials are not provided"
+      (let [handler (handler/auth @handler "username" "password")
+            resp (handler {})]
+        (should= 401 (:status resp))))
+
+    (it "has the www-auth header when auth fails"
+      (let [credentials (String. (b64/encode (.getBytes "admin:admin")))
+            handler (handler/auth @handler "username" "password")
+            resp (handler {:headers {:authorization (str "Basic " credentials)}})]
+        (should= "Basic realm=\"simple\"" (get-in resp [:headers :www-authenticate]))))
+
+    (it "dispatches to the handler if authentication is successful"
+      (let [credentials (String. (b64/encode (.getBytes "admin:password")))
+            handler (handler/auth @handler "admin" "password")
+            resp (handler {:headers {:authorization (str "Basic " credentials)}})]
+        (should= 200 (:status resp))
+        (should= "Welcome" (:body resp))))))

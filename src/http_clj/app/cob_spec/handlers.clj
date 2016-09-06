@@ -2,6 +2,7 @@
   (:require [http-clj.request-handler :as handler]
             [http-clj.file :as file-helper]
             [http-clj.response :as response]
+            [clojure.data.codec.base64 :as b64]
             [clojure.string :as string]))
 
 (defn static [request directory]
@@ -11,7 +12,7 @@
           :else (handler/not-found request))))
 
 (defn log [request log]
-  (response/create request (.toString log)))
+    (response/create request (.toString log) :status 200))
 
 (defn submit-form [request cache]
   (reset! cache (String. (:body request)))

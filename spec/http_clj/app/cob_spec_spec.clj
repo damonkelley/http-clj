@@ -55,8 +55,15 @@
   (it "has /image.gif"
     (should= 200 (:status (GET "/image.gif"))))
 
-  (it "has a viewable log"
-    (should-contain "GET /log HTTP/1.1" (:body (GET "/log"))))
+  (it "has a viewable log when authenticated"
+    (let [response (client/get
+                     "http://localhost:5000/logs"
+                     {:basic-auth ["admin" "hunter2"]})]
+      (should-contain "GET /logs HTTP/1.1" (:body response))))
+
+  (it "unauthorized access to the log is not allowed"
+    (let [response (GET "/logs")]
+      (should= 401 (:status response))))
 
   (it "data can be posted to /form"
     (let [{status :status} (POST "/form" {:form-data true})]

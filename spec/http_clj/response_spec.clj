@@ -20,8 +20,8 @@
       (should= {} (:headers (create @request ""))))
 
     (it "can be provided with headers"
-      (let [{headers :headers} (create @request "" :headers {"Content-Type" "text/html"})]
-        (should= {"Content-Type" "text/html"} headers)))
+      (let [{headers :headers} (create @request "" :headers {:content-type "text/html"})]
+        (should= {:content-type "text/html"} headers)))
 
     (it "has the connection"
       (should= (:conn @request) (:conn (create @request "")))))

@@ -5,6 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/tools.cli "0.3.5"]
+                 [org.clojure/data.codec "0.1.0"]
                  [com.stuartsierra/component  "0.3.1"]
                  [clj-http "2.2.0"]
                  [com.taoensso/timbre "4.7.4"]

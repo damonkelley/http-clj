@@ -2,6 +2,7 @@
   (:require [http-clj.router :refer [route GET POST OPTIONS]]
             [http-clj.server :refer [run]]
             [http-clj.app.cob-spec.handlers :as handlers]
+            [http-clj.request-handler :refer [auth]]
             [http-clj.app.cob-spec.cli :as cli]
             [http-clj.app.cob-spec.logging :as logger]
             [clojure.java.io :as io]
@@ -15,7 +16,7 @@
   (route
     request
     (-> []
-       (GET "/log" #(handlers/log % log))
+       (GET "/logs"  (auth  #(handlers/log % log) "admin" "hunter2"))
        (POST "/form" #(handlers/submit-form % form-cache))
        (GET "/form" #(handlers/last-submission % form-cache))
        (OPTIONS "/method_options" (handlers/options "GET" "HEAD" "POST" "OPTIONS" "PUT"))
