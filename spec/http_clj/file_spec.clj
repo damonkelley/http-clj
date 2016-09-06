@@ -23,7 +23,15 @@
 
     (it "can read bytes 1 through 4 of the file"
       (let [byte-range (file/binary-slurp-range @test-path 1 4)]
-        (should= "ead " (String. byte-range)))))
+        (should= "ead " (String. byte-range))))
+
+    (it "reads the last n bytes when start is nil"
+      (let [byte-range (file/binary-slurp-range @test-path nil 5)]
+        (should= "bytes" (String. byte-range))))
+
+    (it "reads the last n bytes when end is nil"
+      (let [byte-range (file/binary-slurp-range @test-path 5 nil)]
+        (should= "a range of bytes" (String. byte-range)))))
 
   (context "file-helper"
     (it "takes two paths"
