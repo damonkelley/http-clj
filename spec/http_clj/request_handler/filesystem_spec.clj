@@ -37,10 +37,20 @@
     (with test-data "Some content")
     (before-all (spit @test-path @test-data))
 
-    (it "returns a handler when given just a path"
-      (let [{message :body} ((handler/file @test-path) {})]
-        (should= (seq message) (seq (.getBytes @test-data)))))
-
     (it "can accept a request and a file object"
       (let [{message :body} (handler/file {} (io/file @test-path))]
-        (should= (seq message) (seq (.getBytes @test-data)))))))
+        (should= (seq message) (seq (.getBytes @test-data)))))
+
+    (it "responds with a 206 if a range is provided"
+      (let [request {:headers {:range {:start 0 :end 0}}}
+            resp (handler/file request (io/file @test-path))]
+        (should= 206 (:status resp))))
+
+    (it "it has the requested range in the body"
+      (let [request {:headers {:range {:start 0 :end 3}}}
+            resp (handler/file request (io/file @test-path))]
+        (should= "Some" (String. (:body resp))))
+
+      (let [request {:headers {:range {:start 1 :end 3}}}
+            resp (handler/file request (io/file @test-path))]
+        (should= "ome" (String. (:body resp)))))))

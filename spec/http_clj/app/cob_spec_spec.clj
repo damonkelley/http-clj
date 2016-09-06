@@ -55,6 +55,9 @@
   (it "has /image.gif"
     (should= 200 (:status (GET "/image.gif"))))
 
+  (it "can get partial contents of file.txt"
+    (should= 206 (:status (client/get "http://localhost:5000/file.txt" {:headers {:range "bytes=0-4"}}))))
+
   (it "has a viewable log when authenticated"
     (let [response (client/get
                      "http://localhost:5000/logs"
