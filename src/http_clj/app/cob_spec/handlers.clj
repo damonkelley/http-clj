@@ -3,14 +3,21 @@
             [http-clj.request-handler.filesystem :as filesystem]
             [http-clj.file :as file-helper]
             [http-clj.response :as response]
+            [clojure.core.match :refer [match]]
             [clojure.data.codec.base64 :as b64]
             [clojure.string :as string]))
 
 (defn static [request directory]
-  (let [file (file-helper/resolve directory (:path request))]
-    (cond (.isDirectory file) (filesystem/directory request file)
-          (.exists file) (filesystem/file request (.getPath file))
-          :else (handler/not-found request))))
+  (let [file (file-helper/resolve directory (:path request))
+        method (:method request)
+        directory? (.isDirectory file)
+        exists? (.exists file)]
+
+    (match [method directory? exists?]
+      ["GET" true _] (filesystem/directory request file)
+      ["GET" false true] (filesystem/file request (.getPath file))
+      ["PATCH" false true] (filesystem/patch-file request (.getPath file))
+      [_ _ _] (handler/not-found request))))
 
 (defn log [request log]
     (response/create request (.toString log) :status 200))
