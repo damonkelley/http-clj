@@ -39,5 +39,5 @@
     (it "parses Range"
       (should= {:range {:units "bytes" :start 0 :end 4}}
                (parser/parse-field-values {:range "bytes=0-4"}))
-      (should= {:range {:units "bytes" :start 55 :end 60}}
-               (parser/parse-field-values {:range "bytes=55-60"})))))
+      (should= {:range {:units "bytes" :start nil :end 60}}
+               (parser/parse-field-values {:range "bytes=-60"})))))

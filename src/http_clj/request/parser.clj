@@ -32,10 +32,15 @@
 (defn- to-range-map [split-fields]
   (zipmap [:units :start :end] split-fields))
 
+(defn- parse-byte-position [position]
+  (try
+    (Integer/parseInt position)
+    (catch java.lang.NumberFormatException _ nil)))
+
 (defn- parse-start-end [range-map]
   (-> range-map
-      (update :start #(Integer/parseInt %))
-      (update :end #(Integer/parseInt %))))
+      (update :start parse-byte-position)
+      (update :end parse-byte-position)))
 
 (defn- parse-range [field-value]
   (-> field-value
