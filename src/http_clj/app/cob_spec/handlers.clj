@@ -9,7 +9,7 @@
 (defn static [request directory]
   (let [file (file-helper/resolve directory (:path request))]
     (cond (.isDirectory file) (filesystem/directory request file)
-          (.exists file) (filesystem/file request file)
+          (.exists file) (filesystem/file request (.getPath file))
           :else (handler/not-found request))))
 
 (defn log [request log]

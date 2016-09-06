@@ -16,8 +16,7 @@
       (catch clojure.lang.ExceptionInfo e
         (response/create request "" :status 416)))))
 
-(defn file [{:keys [headers] :as request} io-file]
-  (let [path (.getPath io-file)]
-    (if (not-empty (:range headers))
+(defn file [{:keys [headers] :as request} path]
+  (if (not-empty (:range headers))
       (partial-file request path)
-      (response/create request (f/binary-slurp path)))))
+      (response/create request (f/binary-slurp path))))

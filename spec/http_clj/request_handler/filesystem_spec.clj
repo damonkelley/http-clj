@@ -58,10 +58,10 @@
 
     (context "file"
       (it "can accept a request and a file object"
-        (let [{message :body} (handler/file {} (io/file @test-path))]
+        (let [{message :body} (handler/file {} @test-path)]
           (should= (seq message) (seq (.getBytes @test-data)))))
 
       (it "it uses partial-file if a range is provided"
         (let [request {:headers {:range {:start 0 :end 0}}}]
           (should-invoke handler/partial-file {:times 1}
-                         (handler/file request (io/file @test-path))))))))
+                         (handler/file request @test-path)))))))
