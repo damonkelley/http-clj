@@ -1,2 +1,2 @@
 language: clojure
-script: travis_retry lein spec
+script: lein spec -f documentation
