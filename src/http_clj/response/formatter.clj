@@ -14,7 +14,7 @@
   (byte-array (map (comp byte int) string)))
 
 (defn- format-header [[field-name field-value]]
-  (str field-name ": " field-value CRLF))
+  (str (name field-name) ": " field-value CRLF))
 
 (defn- format-headers [headers]
   (apply str (map format-header headers)))

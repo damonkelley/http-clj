@@ -16,22 +16,22 @@
     (with request {:conn (mock/connection)})
 
     (it "is a valid HTTP response"
-      (let [headers {"Accept" "*" "Host" "www.example.com"}
+      (let [headers {:accept "*" :host "www.example.com"}
             response (response/create @request "Hello, world!" :headers headers)
             {message :message} (format-message response)]
         (should= (str "HTTP/1.1 200 OK\r\n"
-                      "Accept: *\r\n"
-                      "Host: www.example.com\r\n"
+                      "accept: *\r\n"
+                      "host: www.example.com\r\n"
                       "\r\n"
                       "Hello, world!")
                  (byte-array->string message))))
 
     (it "formats the headers"
-      (let [headers {"Host" "www.example.com" "Content-Type" "application/json"}
+      (let [headers {:host "www.example.com" :content-type "application/json"}
             response (response/create @request "Message body" :headers headers)
             {message :message} (format-message response)]
-        (should-contain "Host: www.example.com\r\n" (byte-array->string message))
-        (should-contain "Content-Type: application/json" (byte-array->string message))))
+        (should-contain "host: www.example.com\r\n" (byte-array->string message))
+        (should-contain "content-type: application/json" (byte-array->string message))))
 
     (it "uses the body from the response"
       (let [response (response/create @request "Message body")
