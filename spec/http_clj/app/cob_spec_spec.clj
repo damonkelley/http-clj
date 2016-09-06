@@ -20,9 +20,16 @@
     (.await latch)
     thread))
 
+(defn stop-listening []
+  (try
+    (client/get root)
+    (catch java.net.ConnectException e
+      (println "Server already shutdown"))))
+
 (defn shutdown-server [thread]
   (.interrupt thread)
-  (client/get root))
+  (when (.isAlive thread)
+    (stop-listening)))
 
 (defn GET [path]
   (client/get (str root path) {:throw-exceptions false}))
