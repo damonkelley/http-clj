@@ -2,8 +2,8 @@
   (:require [speclj.core :refer :all]
             [http-clj.request-handler.filesystem :as handler]
             [http-clj.response :as response]
+            [http-clj.entity :as entity]
             [hiccup.core :refer [html]]
-            [digest :refer [sha1]]
             [clojure.java.io :as io])
   (:import java.io.File))
 
@@ -74,7 +74,7 @@
           (should= "New content" (slurp @test-path))))
 
       (it "updates the contents of the file if the when the precondition is true"
-        (let [request (assoc-in @request [:headers :if-match] (sha1 @test-data))
+        (let [request (assoc-in @request [:headers :if-match] (entity/tag @test-data))
               resp (handler/patch-file request @test-path)]
           (should= "New content" (slurp @test-path))))
 

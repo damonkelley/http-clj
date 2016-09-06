@@ -1,9 +1,10 @@
 (ns http-clj.request-handler.filesystem
   (:require [http-clj.file :as f]
+            [clojure.java.io :as io]
             [http-clj.response :as response]
             [http-clj.presentation.template :as template]
             [http-clj.presentation.presenter :as presenter]
-            [digest :refer [sha1]]))
+            [http-clj.entity :as entity]
 
 (defn directory [request dir]
   (let [files (presenter/files request (.listFiles dir))
@@ -26,10 +27,9 @@
   (response/create request "" :status 409))
 
 (defn patch-file [{:keys [headers] :as request} file]
-  (let [precondition (:if-match headers)
-        content (f/binary-slurp file)]
+  (let [precondition (:if-match headers)]
     (cond (nil? precondition) (-patch-file request file)
-          (= precondition (sha1 content)) (-patch-file request file)
+          (= precondition (entity/tag (io/as-file file))) (-patch-file request file)
           :else (conflict request))))
 
 (defn file [{:keys [headers] :as request} path]
