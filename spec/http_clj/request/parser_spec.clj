@@ -34,4 +34,10 @@
     (it "parses Content-Length"
       (should= {:content-length 9} (parser/parse-field-values {:content-length "9"}))
       (should= {:content-length 10 :host "www.example.com"}
-               (parser/parse-field-values {:content-length "10" :host "www.example.com"})))))
+               (parser/parse-field-values {:content-length "10" :host "www.example.com"})))
+
+    (it "parses Range"
+      (should= {:range {:units "bytes" :start 0 :end 4}}
+               (parser/parse-field-values {:range "bytes=0-4"}))
+      (should= {:range {:units "bytes" :start nil :end 60}}
+               (parser/parse-field-values {:range "bytes=-60"})))))

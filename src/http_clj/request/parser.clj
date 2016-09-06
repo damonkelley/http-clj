@@ -26,10 +26,37 @@
       lower-case-field-name
       field-name->keyword))
 
-(defn parse-field-values [headers]
-  (if-let [content-length (get headers :content-length)]
-    (update headers :content-length #(Integer/parseInt %))
+(defn- split-range-header [field-value]
+  (string/split field-value #"=|-"))
+
+(defn- to-range-map [split-fields]
+  (zipmap [:units :start :end] split-fields))
+
+(defn- parse-byte-position [position]
+  (try
+    (Integer/parseInt position)
+    (catch java.lang.NumberFormatException _ nil)))
+
+(defn- parse-start-end [range-map]
+  (-> range-map
+      (update :start parse-byte-position)
+      (update :end parse-byte-position)))
+
+(defn- parse-range [field-value]
+  (-> field-value
+      split-range-header
+      to-range-map
+      parse-start-end))
+
+(defn parse-field-value [headers field-name parser]
+  (if-let [field-value (field-name headers)]
+    (update headers field-name parser)
     headers))
+
+(defn parse-field-values [headers]
+  (-> headers
+      (parse-field-value :content-length #(Integer/parseInt %))
+      (parse-field-value :range parse-range)))
 
 (defn parse-headers [headers]
   (->> headers
