@@ -7,9 +7,8 @@
             [clojure.data.codec.base64 :as b64]
             [clojure.string :as string]))
 
-(defn static [request directory]
-  (let [file (file-helper/resolve directory (:path request))
-        method (:method request)
+(defn -static [request file]
+  (let [method (:method request)
         directory? (.isDirectory file)
         exists? (.exists file)]
 
@@ -18,6 +17,10 @@
       ["GET" false true] (filesystem/file request (.getPath file))
       ["PATCH" false true] (filesystem/patch-file request (.getPath file))
       [_ _ _] (handler/not-found request))))
+
+(defn static [request directory]
+  (let [file (file-helper/resolve directory (:path request))]
+    (-static request file)))
 
 (defn log [request log]
     (response/create request (.toString log) :status 200))
