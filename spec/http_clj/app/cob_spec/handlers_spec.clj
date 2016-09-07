@@ -1,6 +1,8 @@
 (ns http-clj.app.cob-spec.handlers-spec
   (:require [speclj.core :refer :all]
             [http-clj.app.cob-spec.handlers :refer :all]
+            [http-clj.request-handler.filesystem :as filesystem]
+            [http-clj.file :as file]
             [clojure.java.io :as io]
             [clojure.data.codec.base64 :as b64])
   (:import java.io.ByteArrayOutputStream))
@@ -9,13 +11,27 @@
   (context "static"
     (with dir "resources/static/")
     (it "responds with a listing if directory"
-      (should-contain "image.gif" (:body (static {:path "/"} @dir))))
+      (let [resp (static {:method "GET" :path "/"} @dir)]
+        (should-contain "image.gif" (:body resp))))
 
     (it "responds with a file if it is a file"
-      (should-contain "File contents" (String. (:body (static {:path "/file.txt"} @dir)))))
+      (let [resp (static {:method "GET" :path "/file.txt"} @dir)]
+        (should-contain "File contents" (String. (:body resp)))))
+
+    (it "responds with a 409 when a PATCH precondition fails"
+      (let [request {:method "PATCH" :path "/file.txt" :headers {:if-match "incorrect-etag"}}
+            resp (static request @dir)]
+        (should= 409 (:status resp))))
+
+    (it "will patch a file"
+      (let [contents (file/binary-slurp "resources/static/file.txt")
+            request {:method "PATCH" :path "/file.txt" :body contents}
+            resp (static request @dir)]
+        (should= 204 (:status resp))))
 
     (it "responds with 404 if a file is not found"
-      (should= 404 (:status (static {:path "/file-that-does-not-exist.txt"} @dir)))))
+      (let [resp (static {:method "GET" :path "/file-that-does-not-exist.txt"} @dir)]
+        (should= 404 (:status resp)))))
 
   (context "log"
     (with output (ByteArrayOutputStream.))

@@ -52,11 +52,20 @@
       (should-contain "file.txt" body)
       (should-contain "image.gif" body)))
 
+  (it "will attempt to patch a static file"
+    (let [resp (client/patch
+                 "http:localhost:5000/file.txt"
+                 {:headers {:if-match "incorrect-etag"}
+                  :throw-exceptions false})]
+      (should= 409 (:status resp))))
+
   (it "has /image.gif"
     (should= 200 (:status (GET "/image.gif"))))
 
   (it "can get partial contents of file.txt"
-    (should= 206 (:status (client/get "http://localhost:5000/file.txt" {:headers {:range "bytes=0-4"}}))))
+    (let [resp (client/get "http://localhost:5000/file.txt"
+                           {:headers {:range "bytes=0-4"}})]
+      (should= 206 (:status resp))))
 
   (it "has a viewable log when authenticated"
     (let [response (client/get
