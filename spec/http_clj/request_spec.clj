@@ -20,10 +20,16 @@
 
   (context "get-request-line"
     (it "parses the request-line"
-      (should= {:method "GET" :path "/file1" :version "HTTP/1.1"}
+      (should= {:method "GET"
+                :path "/file1"
+                :version "HTTP/1.1"
+                :query-params nil}
                (request/get-request-line {:conn @get-conn}))
 
-      (should= {:method "POST" :path "/file2" :version "HTTP/1.1"}
+      (should= {:method "POST"
+                :path "/file2"
+                :version "HTTP/1.1"
+                :query-params nil}
                (request/get-request-line {:conn @post-conn}))))
 
   (context "get-headers"

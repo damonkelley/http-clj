@@ -1,18 +1,19 @@
 (ns http-clj.request
   (:require [clojure.string :as string]
-            [http-clj.request.parser :as parser]
+            [http-clj.request.parser.headers :as headers]
+            [http-clj.request.parser.request-line :as request-line]
             [http-clj.request.reader :as reader]
             [http-clj.request.validator :as validator]))
 
 (defn get-request-line [request]
   (->> request
        reader/readline
-       parser/parse-request-line))
+       request-line/parse))
 
 (defn get-headers [request]
   (-> request
       reader/read-headers
-      parser/parse-headers))
+      headers/parse))
 
 (defn- attach-request-line [request]
   (merge request (get-request-line request)))

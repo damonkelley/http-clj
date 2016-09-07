@@ -1,7 +1,6 @@
 (ns http-clj.request.reader-spec
   (:require [speclj.core :refer :all]
             [http-clj.request.reader :as reader]
-            [http-clj.request.parser :as parser]
             [http-clj.spec-helper.mock :as mock]))
 
 (describe "request.reader"

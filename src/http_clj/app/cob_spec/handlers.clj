@@ -4,7 +4,6 @@
             [http-clj.file :as file-helper]
             [http-clj.response :as response]
             [clojure.core.match :refer [match]]
-            [clojure.data.codec.base64 :as b64]
             [clojure.string :as string]))
 
 (defn -static [request file]
@@ -35,3 +34,9 @@
 (defn options [& allowed-options]
   (let [allow (string/join "," allowed-options)]
     #(response/create % "" :headers {"Allow" allow})))
+
+(defn- present-query-params [query-params]
+  (string/join "\n" (map #(string/join " = " %) query-params)))
+
+(defn parameters [{:keys [query-params] :as request}]
+  (response/create request (present-query-params query-params)))

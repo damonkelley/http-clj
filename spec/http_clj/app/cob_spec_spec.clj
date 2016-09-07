@@ -90,4 +90,10 @@
 
   (it "shows the options at /method_options2"
     (let [headers (:headers (OPTIONS "/method_options2"))]
-      (should= "GET,OPTIONS"(get headers "Allow")))))
+      (should= "GET,OPTIONS" (get headers "Allow"))))
+
+  (it "presents the decoded and formatted query parameters"
+    (let [resp (client/get
+                 (str root "/parameters")
+                 {:query-params {"key" "value"}})]
+      (should= "key = value" (:body resp)))))

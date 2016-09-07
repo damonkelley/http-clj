@@ -62,4 +62,11 @@
   (context "options"
     (it "returns a handler to report the allowed methods"
       (let [options-handler (options "GET" "POST" "OPTIONS")]
-        (should= {"Allow" "GET,POST,OPTIONS"} (:headers (options-handler {})))))))
+        (should= {"Allow" "GET,POST,OPTIONS"} (:headers (options-handler {}))))))
+
+  (context "parameters"
+    (it "responds with the parameters formatted in the body"
+      (let [request {:query-params {"parameter-1" "a"
+                                    "parameter-2" "b"}}]
+        (should-contain "parameter-1 = a\n"(:body (parameters request)))
+        (should-contain "parameter-2 = b"(:body (parameters request)))))))

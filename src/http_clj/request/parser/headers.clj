@@ -1,15 +1,5 @@
-(ns http-clj.request.parser
-  (:require [http-clj.connection :as connection]
-            [http-clj.request.reader :as reader]
-            [clojure.string :as string]))
-
-(defn- split-request-line [line]
-  (take 3 (concat (string/split line #" ") (repeat ""))))
-
-(defn parse-request-line [request-line]
-  (->> request-line
-       split-request-line
-       (zipmap [:method :path :version])))
+(ns http-clj.request.parser.headers
+  (:require [clojure.string :as string]))
 
 (defn- lower-case-field-name [[field-name field-value]]
   [(string/lower-case field-name) field-value])
@@ -58,7 +48,7 @@
       (parse-field-value :content-length #(Integer/parseInt %))
       (parse-field-value :range parse-range)))
 
-(defn parse-headers [headers]
+(defn parse [headers]
   (->> headers
        (map parse-field-name:field-value)
        (into {})
