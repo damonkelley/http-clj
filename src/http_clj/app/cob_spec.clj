@@ -19,6 +19,7 @@
        (GET "/logs"  (auth  #(handlers/log % log) "admin" "hunter2"))
        (POST "/form" #(handlers/submit-form % form-cache))
        (GET "/form" #(handlers/last-submission % form-cache))
+       (GET "/parameters" handlers/parameters)
        (OPTIONS "/method_options" (handlers/options "GET" "HEAD" "POST" "OPTIONS" "PUT"))
        (OPTIONS "/method_options2" (handlers/options "GET" "OPTIONS"))
        (GET #"^/.*$" #(handlers/static % directory))
