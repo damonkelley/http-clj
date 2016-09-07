@@ -40,3 +40,7 @@
 
 (defn parameters [{:keys [query-params] :as request}]
   (response/create request (present-query-params query-params)))
+
+(defn redirect-to-root [request]
+  (let [host (get-in request [:headers :host])]
+    (handler/redirect request (str "http://" host "/"))))
