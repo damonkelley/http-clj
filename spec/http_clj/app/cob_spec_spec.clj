@@ -53,8 +53,10 @@
       (should-contain "image.gif" body)))
 
   (it "will attempt to patch a static file"
-    (let [resp (client/patch "http:localhost:5000/file.txt" {:headers {:if-match "incorrect-etag"}
-                                                             :throw-exceptions false})]
+    (let [resp (client/patch
+                 "http:localhost:5000/file.txt"
+                 {:headers {:if-match "incorrect-etag"}
+                  :throw-exceptions false})]
       (should= 409 (:status resp))))
 
   (it "has /image.gif"
