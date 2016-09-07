@@ -39,3 +39,6 @@
 
 (defn method-not-allowed [request]
   (response/create request "Method Not Allowed" :status 405))
+
+(defn redirect [request location]
+  (response/create request "" :status 302 :headers {:location location}))
