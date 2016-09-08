@@ -1,5 +1,5 @@
 (ns http-clj.app.cob-spec
-  (:require [http-clj.router :refer [route GET POST OPTIONS PATCH]]
+  (:require [http-clj.router :refer [route GET POST OPTIONS PATCH PUT DELETE]]
             [http-clj.server :refer [run]]
             [http-clj.app.cob-spec.handlers :as handlers]
             [http-clj.request-handler :refer [auth]]
@@ -18,6 +18,8 @@
     (-> []
        (GET "/logs"  (auth  #(handlers/log % log) "admin" "hunter2"))
        (POST "/form" #(handlers/submit-form % form-cache))
+       (PUT "/form" #(handlers/submit-form % form-cache))
+       (DELETE "/form" #(handlers/clear-submission % form-cache))
        (GET "/form" #(handlers/last-submission % form-cache))
        (GET "/parameters" handlers/parameters)
        (GET "/redirect" handlers/redirect-to-root)

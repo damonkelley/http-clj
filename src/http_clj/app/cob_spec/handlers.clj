@@ -31,6 +31,10 @@
 (defn last-submission [request cache]
   (response/create request @cache))
 
+(defn clear-submission [request cache]
+  (reset! cache "")
+  (response/create request ""))
+
 (defn options [& allowed-options]
   (let [allow (string/join "," allowed-options)]
     #(response/create % "" :headers {"Allow" allow})))
