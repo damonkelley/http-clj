@@ -1,4 +1,5 @@
-(ns http-clj.app.cob-spec-spec (:require [speclj.core :refer :all]
+(ns http-clj.app.cob-spec-spec
+  (:require [speclj.core :refer :all]
             [clj-http.client :as client]
             [http-clj.server :as s]
             [http-clj.file :as file]
@@ -96,4 +97,9 @@
     (let [resp (client/get
                  (str root "/parameters")
                  {:query-params {"key" "value"}})]
-      (should= "key = value" (:body resp)))))
+      (should= "key = value" (:body resp))))
+
+  (it "redirects /redirect to /"
+    (let [resp (client/get (str root "/redirect"))]
+      (should= [(str root "/redirect") (str root "/")]
+               (:trace-redirects resp)))))

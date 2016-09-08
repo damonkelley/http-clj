@@ -68,4 +68,12 @@
             handler (handler/auth @handler "admin" "password")
             resp (handler {:headers {:authorization (str "Basic " credentials)}})]
         (should= 200 (:status resp))
-        (should= "Welcome" (:body resp))))))
+        (should= "Welcome" (:body resp)))))
+
+  (context "redirect"
+    (it "responds with a 302 status code"
+      (should= 302 (:status (handler/redirect {} "/"))))
+
+    (it "has a location header"
+      (let [resp (handler/redirect {} "/path")]
+        (should= "/path" (get-in resp [:headers :location]))))))

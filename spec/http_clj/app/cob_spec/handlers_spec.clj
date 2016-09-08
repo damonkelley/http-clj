@@ -68,5 +68,12 @@
     (it "responds with the parameters formatted in the body"
       (let [request {:query-params {"parameter-1" "a"
                                     "parameter-2" "b"}}]
-        (should-contain "parameter-1 = a\n"(:body (parameters request)))
-        (should-contain "parameter-2 = b"(:body (parameters request)))))))
+        (should-contain "parameter-1 = a\n" (:body (parameters request)))
+        (should-contain "parameter-2 = b" (:body (parameters request))))))
+
+  (context "redirect-to-root"
+    (it "redirects to the root"
+      (let [request {:headers {:host "host:port"}}
+            resp (redirect-to-root request)]
+        (should= 302 (:status resp))
+        (should= "http://host:port/" (get-in resp [:headers :location]))))))

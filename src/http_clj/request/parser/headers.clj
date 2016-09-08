@@ -7,8 +7,17 @@
 (defn- field-name->keyword [[field-name field-value]]
   [(keyword field-name) field-value])
 
+(defn- filter-matching-groups [matches]
+  (drop 1 matches))
+
+(defn- trim-name-and-value [header]
+  (map string/trim header))
+
 (defn- split-header [header]
-  (map string/trim (string/split header #":")))
+    (->> header
+        (re-find #"^(.*?):(.*?)$")
+        filter-matching-groups
+        trim-name-and-value))
 
 (defn- parse-field-name:field-value [header]
   (-> header
