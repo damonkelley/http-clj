@@ -57,7 +57,17 @@
           (should= "submitted=true" (:body (last-submission {} cache)))
 
           (reset! cache "submitted=twice")
-          (should= "submitted=twice" (:body (last-submission {} cache)))))))
+          (should= "submitted=twice" (:body (last-submission {} cache))))))
+
+    (context "clear-submission"
+      (with cache (atom "count=20"))
+
+      (it "responds with a 200"
+        (should= 200 (:status (clear-submission {} @cache))))
+
+      (it "clears the form cache"
+        (clear-submission {} @cache)
+        (should= "" @@cache))))
 
   (context "options"
     (it "returns a handler to report the allowed methods"

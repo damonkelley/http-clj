@@ -78,12 +78,32 @@
     (let [response (GET "/logs")]
       (should= 401 (:status response))))
 
-  (it "data can be posted to /form"
-    (let [{status :status} (POST "/form" {:form-data true})]
-      (should= 200 status))
-    (should-contain "form-data=true" (:body (GET "/form")))
-    (POST "/form" {:new-form-data true})
-    (should-contain "new-form-data=true" (:body (GET "/form"))))
+  (describe "/form"
+    (it "accepts POST requests"
+      (let [{status :status} (POST "/form" {:form-data true})]
+        (should= 200 status))
+      (should-contain "form-data=true" (:body (GET "/form")))
+
+      (POST "/form" {:new-form-data true})
+      (should-contain "new-form-data=true" (:body (GET "/form"))))
+
+    (it "accepts PUT requests"
+      (let [resp (client/put (str root "/form") {:body "name=John Doe"})]
+        (should= 200 (:status resp))))
+
+    (it "replaces the form cache with the PUT body"
+      (client/put (str root "/form") {:body "name=John Doe"})
+
+      (let [resp (client/get (str root "/form"))]
+        (should= "name=John Doe" (:body resp))))
+
+    (it "removes the form data when DELETE is received"
+      (client/put (str root "/form") {:body "name=John Doe"})
+
+      (let [delete-response (client/delete (str root "/form"))]
+        (should= 200 (:status delete-response)))
+
+      (should= "" (:body (client/get (str root "/form"))))))
 
   (it "shows the options at /method_options"
     (let [headers (:headers (OPTIONS "/method_options"))]
