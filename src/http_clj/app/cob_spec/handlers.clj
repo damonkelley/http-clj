@@ -35,6 +35,12 @@
   (reset! cache "")
   (response/create request ""))
 
+(defn no-coffee [request]
+  (response/create request "I'm a teapot" :status 418))
+
+(defn tea [request]
+  (response/create request ""))
+
 (defn options [& allowed-options]
   (let [allow (string/join "," allowed-options)]
     #(response/create % "" :headers {"Allow" allow})))
