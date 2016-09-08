@@ -11,14 +11,28 @@
 
 (describe "a server component"
   (with application {:entrypoint identity})
+
   (it "can be created using a port"
-    (let [server (s/create @application :port 5001)]
+    (let [server (s/create @application
+                           :port 5001
+                           :server-socket mock/socket-server)]
       (should-be-a java.net.ServerSocket (:server-socket server))
       (component/stop server)))
 
   (it "can be created by injecting a ServerSocket"
     (let [server (s/create @application :server-socket mock/socket-server)]
       (should-be-a java.net.ServerSocket (:server-socket server))))
+
+  (it "can be created with a thread pool"
+    (let [server (s/create @application
+                           :thread-pool :executor
+                           :server-socket mock/socket-server)]
+      (should= :executor (:thread-pool server))))
+
+  (it "has thread pool by default"
+    (let [server (s/create @application :server-socket mock/socket-server)]
+      (should-be-a java.util.concurrent.ExecutorService
+                   (:thread-pool server))))
 
   (it "will close the server"
     (let [server-socket (mock/socket-server)
@@ -28,9 +42,9 @@
       (should= true (.isClosed (:server-socket server)))))
 
   (it "will accept connections"
-    (should= true (satisfies? connection/Connection
-                              (-> (s/create @application :server-socket mock/socket-server)
-                                  (s/accept))))))
+    (let [conn (-> (s/create @application :server-socket mock/socket-server)
+                   s/accept)]
+      (should= true (satisfies? connection/Connection conn)))))
 
 (defrecord DegenerateLogger []
   logging/Logger
