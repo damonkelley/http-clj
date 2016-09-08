@@ -10,11 +10,17 @@
 (defprotocol Server
   (accept [component]))
 
-(defn listen [server app]
-  (-> server
-      accept
+(defn process-request [conn app]
+  (-> conn
       (protocol/http app)
       connection/close))
+
+(defn new-worker [thread-pool app]
+  (.execute thread-pool app))
+
+(defn listen [server app]
+  (let [conn (accept server)]
+    (new-worker (:thread-pool server) #(process-request conn app))))
 
 (defn- open-latch [latch]
   (.countDown latch))
@@ -53,5 +59,5 @@
       (component/start)
       (component/stop)))
 
-(defn run [app port]
-  (serve (create app :port port)))
+(defn run [app port thread-pool]
+  (serve (create app :port port :thread-pool thread-pool)))

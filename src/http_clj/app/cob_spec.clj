@@ -7,7 +7,8 @@
             [http-clj.app.cob-spec.logging :as logger]
             [clojure.java.io :as io]
             [taoensso.timbre.appenders.core :as appenders])
-  (:import java.io.ByteArrayOutputStream))
+  (:import java.io.ByteArrayOutputStream
+           java.util.concurrent.Executors))
 
 (def log (ByteArrayOutputStream.))
 (def form-cache (atom ""))
@@ -39,4 +40,6 @@
 
 (defn -main [& args]
   (let [{options :options} (cli/cli args)]
-    (run (app (:directory options)) (:port options))))
+    (run (app (:directory options))
+         (:port options)
+         (Executors/newFixedThreadPool 50))))

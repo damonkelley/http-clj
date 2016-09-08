@@ -7,7 +7,8 @@
             [http-clj.spec-helper.mock :as mock]
             [http-clj.logging :as logging]
             [com.stuartsierra.component :as component])
-  (:import java.io.ByteArrayOutputStream))
+  (:import java.io.ByteArrayOutputStream
+           java.util.concurrent.Executors))
 
 (describe "a server component"
   (with application {:entrypoint identity})
@@ -55,17 +56,26 @@
     (should-fail "The connection should be open"))
   (response/create request "App was called"))
 
+(describe "process-request"
+  (with application {:entrypoint test-app
+                     :logger (->DegenerateLogger)})
+
+  (it "sends the conn and app to the http protocol"
+    (should-invoke protocol/http {:times 1 :return (mock/connection)}
+                   (s/process-request (mock/connection) @application)))
+  (it "closes the connection"
+    (let [conn (s/process-request (mock/connection) @application)]
+      (should= nil (:socket conn)))))
+
 (describe "listen"
   (with server (mock/server))
   (with application {:entrypoint test-app
                      :logger (->DegenerateLogger)})
-  (it "dispatches to http"
-    (should-invoke protocol/http {:times 1 :return (mock/connection)}
-                   (s/listen @server @application)))
 
-  (it "closes the connection"
-    (let [{socket :socket} (s/listen @server @application)]
-      (should= nil socket))))
+  (it "creates a new worker to process the request"
+    (should-invoke s/new-worker {:times 1}
+                   (s/listen @server @application)))
+  )
 
 (defn interrupting-app [request]
   (loop [count 3]
