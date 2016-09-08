@@ -19,19 +19,27 @@
         (should-contain "File contents" (String. (:body resp)))))
 
     (it "responds with a 409 when a PATCH precondition fails"
-      (let [request {:method "PATCH" :path "/file.txt" :headers {:if-match "incorrect-etag"}}
-            resp (static request @dir)]
-        (should= 409 (:status resp))))
+      (let [request {:method "PATCH"
+                     :path "/file.txt"
+                     :headers {:if-match "incorrect-etag"}}]
+        (should= 409 (:status (static request @dir)))))
 
     (it "will patch a file"
       (let [contents (file/binary-slurp "resources/static/file.txt")
-            request {:method "PATCH" :path "/file.txt" :body contents}
-            resp (static request @dir)]
-        (should= 204 (:status resp))))
+            request {:method "PATCH" :path "/file.txt" :body contents}]
+        (should= 204 (:status (static request @dir)))))
 
     (it "responds with 404 if a file is not found"
-      (let [resp (static {:method "GET" :path "/file-that-does-not-exist.txt"} @dir)]
-        (should= 404 (:status resp)))))
+      (let [request{:method "GET" :path "/does-not-exist.txt"}]
+        (should= 404 (:status (static request @dir)))))
+
+    (it "responds to HEAD requests when the path is a directory"
+      (let [request {:method "HEAD" :path "/"}]
+        (should= 200 (:status (static request @dir)))))
+
+    (it "responds to HEAD requests when the path is a file"
+      (let [request {:method "HEAD" :path "/file.txt"}]
+        (should= 200 (:status (static request @dir))))))
 
   (context "log"
     (with output (ByteArrayOutputStream.))
