@@ -71,6 +71,17 @@
         (clear-submission {} @cache)
         (should= "" @@cache))))
 
+  (describe "no-coffee"
+    (it "responds with 418"
+      (should= 418 (:status (no-coffee {}))))
+
+    (it "has content in the body"
+      (should= "I'm a teapot" (:body (no-coffee {})))))
+
+  (describe "tea"
+    (it "responds with 200"
+      (should= 200 (:status (tea {})))))
+
   (describe "options"
     (it "returns a handler to report the allowed methods"
       (let [options-handler (options "GET" "POST" "OPTIONS")]

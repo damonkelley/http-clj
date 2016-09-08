@@ -105,6 +105,15 @@
 
       (should= "" (:body (client/get (str root "/form"))))))
 
+  (describe "/coffee"
+    (it "responds with 418"
+      (should= 418 (:status (client/get (str root "/coffee")
+                                        {:throw-exceptions false})))))
+
+  (describe "/tea"
+    (it "responds with 200"
+      (should= 200 (:status (client/get (str root "/tea"))))))
+
   (it "shows the options at /method_options"
     (let [headers (:headers (OPTIONS "/method_options"))]
       (should= "GET,HEAD,POST,OPTIONS,PUT"(get headers "Allow"))))
