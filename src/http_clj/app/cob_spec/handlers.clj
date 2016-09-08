@@ -12,8 +12,8 @@
         exists? (.exists file)]
 
     (match [method directory? exists?]
-      ["GET" true _] (filesystem/directory request file)
-      ["GET" false true] (filesystem/file request (.getPath file))
+      [(:or "GET" "HEAD") true _] (filesystem/directory request file)
+      [(:or "GET" "HEAD") false true] (filesystem/file request (.getPath file))
       ["PATCH" false true] (filesystem/patch-file request (.getPath file))
       [_ _ _] (handler/not-found request))))
 
