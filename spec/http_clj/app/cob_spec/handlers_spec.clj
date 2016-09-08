@@ -8,7 +8,7 @@
   (:import java.io.ByteArrayOutputStream))
 
 (describe "handlers"
-  (context "static"
+  (describe "static"
     (with dir "resources/static/")
     (it "responds with a listing if directory"
       (let [resp (static {:method "GET" :path "/"} @dir)]
@@ -33,7 +33,7 @@
       (let [resp (static {:method "GET" :path "/file-that-does-not-exist.txt"} @dir)]
         (should= 404 (:status resp)))))
 
-  (context "log"
+  (describe "log"
     (with output (ByteArrayOutputStream.))
     (with request-log (io/writer @output))
 
@@ -44,22 +44,24 @@
       (should-contain "message 1\n" (:body (log {} @output)))))
 
   (context "form"
-    (context "submit-form"
+    (describe "submit-form"
+      (with cache (atom ""))
+
       (it "updates the form"
-        (let [cache (atom "")]
-          (should= 200 (:status (submit-form {:body (.getBytes "submitted=true")} cache)))
-          (should= "submitted=true" @cache))))
+        (should= 200 (:status (submit-form {:body (.getBytes "submitted=true")} @cache)))
+        (should= "submitted=true" @@cache)))
 
-    (context "last-submission"
+    (describe "last-submission"
+      (with cache (atom "submitted=true"))
+
       (it "displays the content of the last submission"
-        (let [cache (atom "submitted=true")]
-          (should= 200 (:status (last-submission {} cache)))
-          (should= "submitted=true" (:body (last-submission {} cache)))
+        (should= 200 (:status (last-submission {} @cache)))
+        (should= "submitted=true" (:body (last-submission {} @cache)))
 
-          (reset! cache "submitted=twice")
-          (should= "submitted=twice" (:body (last-submission {} cache))))))
+        (reset! @cache "submitted=twice")
+        (should= "submitted=twice" (:body (last-submission {} @cache)))))
 
-    (context "clear-submission"
+    (describe "clear-submission"
       (with cache (atom "count=20"))
 
       (it "responds with a 200"
@@ -69,19 +71,19 @@
         (clear-submission {} @cache)
         (should= "" @@cache))))
 
-  (context "options"
+  (describe "options"
     (it "returns a handler to report the allowed methods"
       (let [options-handler (options "GET" "POST" "OPTIONS")]
         (should= {"Allow" "GET,POST,OPTIONS"} (:headers (options-handler {}))))))
 
-  (context "parameters"
+  (describe "parameters"
     (it "responds with the parameters formatted in the body"
       (let [request {:query-params {"parameter-1" "a"
                                     "parameter-2" "b"}}]
         (should-contain "parameter-1 = a\n" (:body (parameters request)))
         (should-contain "parameter-2 = b" (:body (parameters request))))))
 
-  (context "redirect-to-root"
+  (describe "redirect-to-root"
     (it "redirects to the root"
       (let [request {:headers {:host "host:port"}}
             resp (redirect-to-root request)]
