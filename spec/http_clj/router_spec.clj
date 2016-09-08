@@ -119,6 +119,22 @@
           (should= {"PATCH" :patch-handler "GET" :get-handler}
                    (:handlers (find-route routes "/path"))))))
 
+    (context "PUT"
+      (with routes [{:path "/path" :handlers {"DELETE" :delete-handler}}])
+
+      (it "adds the PUT handler"
+        (let [routes (PUT @routes "/path" :put-handler)]
+          (should= {"PUT" :put-handler "DELETE" :delete-handler}
+                   (:handlers (find-route routes "/path"))))))
+
+    (context "DELETE"
+      (with routes [{:path "/path" :handlers {"PUT" :put-handler}}])
+
+      (it "adds the DELETE handler"
+        (let [routes (DELETE @routes "/path" :delete-handler)]
+          (should= {"DELETE" :delete-handler "PUT" :put-handler}
+                   (:handlers (find-route routes "/path"))))))
+
     (context "OPTIONS"
       (with routes [{:path "/path" :handlers {"POST" :post-handler}}])
 

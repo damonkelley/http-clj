@@ -37,6 +37,18 @@
     {:path path
      :handlers {"PATCH" handler}}))
 
+(defn PUT [routes path handler]
+  (helper/update-route
+    routes
+    {:path path
+     :handlers {"PUT" handler}}))
+
+(defn DELETE [routes path handler]
+  (helper/update-route
+    routes
+    {:path path
+     :handlers {"DELETE" handler}}))
+
 (defn OPTIONS [routes path handler]
   (helper/update-route
     routes
