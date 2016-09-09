@@ -4,16 +4,23 @@
             [http-clj.protocol :as protocol]
             [http-clj.logging :as logging])
   (:import java.net.ServerSocket
-           java.util.concurrent.CountDownLatch))
+           java.util.concurrent.CountDownLatch
+           java.util.concurrent.Executors))
 
 (defprotocol Server
   (accept [component]))
 
-(defn listen [server app]
-  (-> server
-      accept
+(defn process-request [conn app]
+  (-> conn
       (protocol/http app)
       connection/close))
+
+(defn new-worker [thread-pool app]
+  (.execute thread-pool app))
+
+(defn listen [server app]
+  (let [conn (accept server)]
+    (new-worker (:thread-pool server) #(process-request conn app))))
 
 (defn- open-latch [latch]
   (.countDown latch))
@@ -24,7 +31,7 @@
     (listen server app))
   server)
 
-(defrecord ConnectionServer [server-socket application latch]
+(defrecord ConnectionServer [server-socket application thread-pool latch]
   component/Lifecycle
   (start [server]
     (listen-until-interrupt server application latch)
@@ -40,16 +47,17 @@
         .accept
         connection/create)))
 
-(defn create [application & {:keys [port server-socket latch]
+(defn create [application & {:keys [port server-socket thread-pool latch ]
                              :or {port 5000
                                   server-socket #(ServerSocket. %)
+                                  thread-pool (Executors/newSingleThreadExecutor)
                                   latch (CountDownLatch. 0)}}]
-  (->ConnectionServer (server-socket port) application latch))
+  (->ConnectionServer (server-socket port) application thread-pool latch))
 
 (defn serve [server]
   (-> server
       (component/start)
       (component/stop)))
 
-(defn run [app port]
-  (serve (create app :port port)))
+(defn run [app port thread-pool]
+  (serve (create app :port port :thread-pool thread-pool)))
