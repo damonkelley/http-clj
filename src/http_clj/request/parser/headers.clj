@@ -47,6 +47,20 @@
       to-range-map
       parse-start-end))
 
+(defn- parse-cookie-pair [pair]
+  (-> pair
+    (string/split #"=")
+    field-name->keyword
+    (into {})))
+
+(defn- parse-cookie-pairs [pairs]
+  (into {} (map parse-cookie-pair pairs)))
+
+(defn- parse-cookie [field-value]
+  (-> field-value
+      (string/split #"; ")
+      (parse-cookie-pairs)))
+
 (defn parse-field-value [headers field-name parser]
   (if-let [field-value (field-name headers)]
     (update headers field-name parser)
@@ -55,7 +69,8 @@
 (defn parse-field-values [headers]
   (-> headers
       (parse-field-value :content-length #(Integer/parseInt %))
-      (parse-field-value :range parse-range)))
+      (parse-field-value :range parse-range)
+      (parse-field-value :cookie parse-cookie)))
 
 (defn parse [headers]
   (->> headers

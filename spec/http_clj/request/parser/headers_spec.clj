@@ -29,4 +29,10 @@
       (should= {:range {:units "bytes" :start 0 :end 4}}
                (headers/parse-field-values {:range "bytes=0-4"}))
       (should= {:range {:units "bytes" :start nil :end 60}}
-               (headers/parse-field-values {:range "bytes=-60"})))))
+               (headers/parse-field-values {:range "bytes=-60"})))
+
+    (it "parses Cookie"
+      (should= {:cookie {:key "value"}}
+               (headers/parse-field-values {:cookie "key=value"}))
+      (should= {:cookie {:key "value" :token "abc123"}}
+               (headers/parse-field-values {:cookie "key=value; token=abc123"})))))
