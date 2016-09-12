@@ -119,14 +119,15 @@
 
       (it "sets the cookie using the type parameters"
         (let [request {:query-params {"type" "Gingerbread"}}]
-          (should= "type=Gingerbread"
+          (should= [ "type=Gingerbread"]
                    (get-in (cookie request) [:headers :set-cookie])))
 
         (let [request {:query-params {"type" "Sugar"}}]
-          (should= "type=Sugar"
+          (should= ["type=Sugar"]
                    (get-in (cookie request) [:headers :set-cookie]))))
+
       (it "does not have a Set-Cookie header if the type param is not included"
-        (should-not-contain :set-cookie (:headers (cookie {})))))
+        (should-be empty? (:headers (cookie {})))))
 
     (describe "eat-cookie"
       (it "responds with 200"
