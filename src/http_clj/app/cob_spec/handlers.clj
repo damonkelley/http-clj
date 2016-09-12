@@ -54,3 +54,22 @@
 (defn redirect-to-root [request]
   (let [host (get-in request [:headers :host])]
     (handler/redirect request (str "http://" host "/"))))
+
+(defn- generate-cookie-headers [query-params]
+  (if-let [-type (get query-params "type")]
+    {:set-cookie (str "type=" -type)}
+    {}))
+
+(defn cookie [{:keys [query-params] :as request}]
+  (response/create
+    request
+    "Eat"
+    :headers (generate-cookie-headers query-params)))
+
+(defn- present-cookie [{headers :headers}]
+  (if-let [-type (get-in headers [:cookie :type])]
+    (str "mmmm " -type)
+    ""))
+
+(defn eat-cookie [request]
+  (response/create request (present-cookie request)))
