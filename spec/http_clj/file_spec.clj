@@ -3,7 +3,6 @@
             [http-clj.file :as file]))
 
 (describe "file"
-  (tags "file")
   (with test-path "/tmp/http-clj-test-file")
   (before (spit @test-path ""))
 
@@ -37,6 +36,11 @@
     (it "raises an exception if offset is outside of the length of the file"
       (should-throw clojure.lang.ExceptionInfo
                     (file/binary-slurp-range @test-path 0 5000))))
+
+  (describe "content-type-of"
+    (it "it determines the content type of the file"
+      (should= "text/plain" (file/content-type-of "file.txt"))
+      (should= "image/gif" (file/content-type-of "image.gif"))))
 
   (context "resolve"
     (it "takes two paths"

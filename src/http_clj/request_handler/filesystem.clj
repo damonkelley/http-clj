@@ -38,4 +38,5 @@
 (defn file [{:keys [headers] :as request} path]
   (if (not-empty (:range headers))
       (partial-file request path)
-      (response/create request (f/binary-slurp path))))
+      (response/create request (f/binary-slurp path)
+                       :headers {:content-type (f/content-type-of path)})))

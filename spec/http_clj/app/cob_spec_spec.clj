@@ -47,11 +47,14 @@
 (describe "cob-spec"
   (before-all (reset! thread (start-server app 5000)))
   (after-all (shutdown-server @thread))
-  (it "has /"
-    (let [{status :status body :body} (GET "/")]
-      (should= 200 status)
-      (should-contain "file.txt" body)
-      (should-contain "image.gif" body)))
+
+  (describe "static files"
+    (context "/"
+    (it "displays the directory contents"
+      (let [{status :status body :body} (GET "/")]
+        (should= 200 status)
+        (should-contain "file.txt" body)
+        (should-contain "image.gif" body)))))
 
   (it "will attempt to patch a static file"
     (let [resp (client/patch
@@ -60,8 +63,14 @@
                   :throw-exceptions false})]
       (should= 409 (:status resp))))
 
-  (it "has /image.gif"
-    (should= 200 (:status (GET "/image.gif"))))
+  (describe "/image.gif"
+    (with response (client/get (str root "/image.gif")))
+
+    (it "responds with 200"
+      (should= 200 (:status @response)))
+
+    (it "has a Content-Type header of image/gif"
+      (should= "image/gif" (get-in @response [:headers :content-type]))))
 
   (it "can get partial contents of file.txt"
     (let [resp (client/get "http://localhost:5000/file.txt"
