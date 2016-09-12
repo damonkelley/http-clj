@@ -13,10 +13,19 @@
 (defn- to-byte-array [string]
   (byte-array (map (comp byte int) string)))
 
-(defn- format-header [[field-name field-value]]
+(defmulti format-header
+  (fn [[_ field-value]]
+    (type field-value)))
+
+(defmethod format-header String
+  [[field-name field-value]]
   (str (name field-name) ": " field-value CRLF))
 
-(defn- format-headers [headers]
+(defmethod format-header clojure.lang.Seqable
+  [[field-name field-values]]
+  (apply str (map #(format-header [field-name %]) field-values)))
+
+(defn format-headers [headers]
   (apply str (map format-header headers)))
 
 (defn- generate-status-line [status]
