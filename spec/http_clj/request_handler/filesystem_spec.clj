@@ -47,6 +47,11 @@
               resp (handler/partial-file request @test-path)]
           (should= 206 (:status resp))))
 
+      (it "has the content type of the file"
+        (let [request {:headers {:range {:start 0 :end 0}}}
+              resp (handler/partial-file request @test-path)]
+          (should= "text/plain" (get-in resp [:headers :content-type]))))
+
       (it "it has the requested range in the body"
         (let [request {:headers {:range {:start 0 :end 3}}}
               resp (handler/partial-file request @test-path)]
