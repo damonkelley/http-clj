@@ -9,6 +9,14 @@
 (defn- format-content-range [units start end length]
   (str units " " start "-" end "/" length))
 
-(defn add-content-range [resp units start end length]
-  (assoc-in resp [:headers :content-range]
-            (format-content-range units start end length)))
+(defn- format-wildcard-content-range [units length]
+  (str "bytes " "*/" length))
+
+(defn- -add-content-range [resp field-value]
+  (assoc-in resp [:headers :content-range] field-value))
+
+(defn add-content-range
+  ([resp units start end length]
+  (-add-content-range resp (format-content-range units start end length)))
+  ([resp units length]
+   (-add-content-range resp (format-wildcard-content-range units length))))

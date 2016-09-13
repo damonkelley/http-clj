@@ -17,4 +17,8 @@
                (helpers/add-content-range {} "bytes" 0 3 77))
 
       (should= {:headers {:content-range "chars 6-10/100"}}
-               (helpers/add-content-range {} "chars" 6 10 100)))))
+               (helpers/add-content-range {} "chars" 6 10 100)))
+
+    (it "provides a wildcard range when only the units and length are given"
+      (should= {:headers {:content-range "bytes */100"}}
+               (helpers/add-content-range {} "bytes" 100)))))
