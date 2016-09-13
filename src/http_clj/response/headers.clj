@@ -1,4 +1,4 @@
-(ns http-clj.response.helpers
+(ns http-clj.response.headers
   (:require [http-clj.file :as file]))
 
 (defn add-content-type [resp path]
