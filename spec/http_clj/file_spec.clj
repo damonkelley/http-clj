@@ -18,20 +18,20 @@
                (seq (file/binary-slurp @test-path)))))
 
   (describe "query-file-range"
-    (before (spit @test-path "Read a range of bytes"))
+    (before (spit @test-path "Query a range of bytes"))
 
     (it "can read the first 4 bytes of a file"
-      (let [range-info (file/query-range @test-path 0 3)]
-        (should= "Read" (String. (:range range-info)))))
+      (let [range-info (file/query-range @test-path 0 4)]
+        (should= "Query" (String. (:range range-info)))))
 
     (it "can read bytes 1 through 4 of the file"
-      (let [range-info (file/query-range @test-path 1 4)]
-        (should= "ead " (String. (:range range-info)))))
+      (let [range-info (file/query-range @test-path 1 5)]
+        (should= "uery " (String. (:range range-info)))))
 
     (it "raises an exception if offset is outside of the length of the file"
       (should-throw clojure.lang.ExceptionInfo
                     (file/query-range @test-path 0 5000))
-      (should= {:cause :unsatisfiable :length 21}
+      (should= {:cause :unsatisfiable :length 22}
                (try (file/query-range @test-path 0 5000)
                     (catch Exception e
                       (ex-data e)))))
@@ -53,20 +53,20 @@
 
     (it "accepts a nil start position"
       (let [range-info (file/query-range @test-path nil 3)]
-        (should= {:start 18 :end 20 :length 21} (dissoc range-info :range))
+        (should= {:start 19 :end 21 :length 22} (dissoc range-info :range))
         (should= "tes" (String. (:range range-info))))
 
       (let [range-info (file/query-range @test-path nil 5)]
-        (should= {:start 16 :end 20 :length 21} (dissoc range-info :range))
+        (should= {:start 17 :end 21 :length 22} (dissoc range-info :range))
         (should= "bytes" (String. (:range range-info)))))
 
     (it "accepts a nil end position"
-      (let [range-info (file/query-range @test-path 5 nil)]
-        (should= {:start 5 :end 20 :length 21} (dissoc range-info :range))
+      (let [range-info (file/query-range @test-path 6 nil)]
+        (should= {:start 6 :end 21 :length 22} (dissoc range-info :range))
         (should= "a range of bytes" (String. (:range range-info))))
 
-      (let [range-info (file/query-range @test-path 16 nil)]
-        (should= {:start 16 :end 20 :length 21} (dissoc range-info :range))
+      (let [range-info (file/query-range @test-path 17 nil)]
+        (should= {:start 17 :end 21 :length 22} (dissoc range-info :range))
         (should= "bytes" (String. (:range range-info))))))
 
   (context "binary-slurp-range"
