@@ -20,12 +20,17 @@
       (helpers/add-content-type path)
       (helpers/add-content-range "bytes" start end length))))
 
+(defn- range-unsatisfiable [request length]
+  (-> request
+      (response/create "" :status 416)
+      (helpers/add-content-range "bytes" length)))
+
 (defn partial-file [request path]
   (let [{start :start end :end} (get-in request [:headers :range])]
     (try
       (-partial-file request path)
       (catch clojure.lang.ExceptionInfo e
-        (response/create request "" :status 416)))))
+        (range-unsatisfiable request (:length (ex-data e)))))))
 
 (defn- -file [request path]
   (-> request
@@ -34,8 +39,8 @@
 
 (defn file [{:keys [headers] :as request} path]
   (if (not-empty (:range headers))
-      (partial-file request path)
-      (-file request path)))
+    (partial-file request path)
+    (-file request path)))
 
 (defn- -patch-file [request file]
   (with-open [stream (clojure.java.io/output-stream file)]

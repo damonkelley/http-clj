@@ -73,7 +73,12 @@
       (it "responds with a 416 if the range is not satisfiable"
         (let [request {:headers {:range {:start 1 :end 500}}}
               resp (handler/partial-file request @test-path)]
-          (should= 416 (:status resp)))))
+          (should= 416 (:status resp))))
+
+      (it "includes the Content-Range when a request is not satisfiable"
+        (let [request {:headers {:range {:start 1 :end 500}}}
+              resp (handler/partial-file request @test-path)]
+          (should= "bytes */12" (get-in resp [:headers :content-range])))))
 
     (context "patch-file"
       (with request {:body (.getBytes "New content")})
