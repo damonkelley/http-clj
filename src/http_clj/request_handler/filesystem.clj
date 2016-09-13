@@ -18,12 +18,13 @@
     (-> request
       (response/create range :status 206)
       (headers/add-content-type path)
-      (headers/add-content-range "bytes" start end length))))
+      (headers/add-content-range units start end length))))
 
 (defn- range-unsatisfiable [request length]
-  (-> request
-      (response/create "" :status 416)
-      (headers/add-content-range "bytes" length)))
+  (let [units (get-in request [:headers :range :units])]
+    (-> request
+        (response/create "" :status 416)
+        (headers/add-content-range units length))))
 
 (defn partial-file [request path]
   (let [{start :start end :end} (get-in request [:headers :range])]
