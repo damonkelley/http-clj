@@ -107,4 +107,35 @@
       (let [request {:headers {:host "host:port"}}
             resp (redirect-to-root request)]
         (should= 302 (:status resp))
-        (should= "http://host:port/" (get-in resp [:headers :location]))))))
+        (should= "http://host:port/" (get-in resp [:headers :location])))))
+
+  (context "cookie data"
+    (describe "cookie"
+      (it "responds with 200"
+        (should= 200 (:status (cookie {}))))
+
+      (it "has 'Eat' in the body"
+        (should= "Eat" (:body (cookie {}))))
+
+      (it "sets the cookie using the type parameters"
+        (let [request {:query-params {"type" "Gingerbread"}}]
+          (should= [ "type=Gingerbread"]
+                   (get-in (cookie request) [:headers :set-cookie])))
+
+        (let [request {:query-params {"type" "Sugar"}}]
+          (should= ["type=Sugar"]
+                   (get-in (cookie request) [:headers :set-cookie]))))
+
+      (it "does not have a Set-Cookie header if the type param is not included"
+        (should-be empty? (:headers (cookie {})))))
+
+    (describe "eat-cookie"
+      (it "responds with 200"
+        (should= 200 (:status (eat-cookie {}))))
+
+      (it "uses the type key from the cookie to create the body"
+        (let [request {:headers {:cookie {:type "sugar"}}}]
+          (should= "mmmm sugar" (:body (eat-cookie request))))
+
+        (let [request {:headers {:cookie {:type "chocolate"}}}]
+          (should= "mmmm chocolate" (:body (eat-cookie request))))))))

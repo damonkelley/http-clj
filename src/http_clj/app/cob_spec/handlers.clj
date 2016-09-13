@@ -3,6 +3,7 @@
             [http-clj.request-handler.filesystem :as filesystem]
             [http-clj.file :as file-helper]
             [http-clj.response :as response]
+            [http-clj.response.cookies :as cookies]
             [clojure.core.match :refer [match]]
             [clojure.string :as string]))
 
@@ -54,3 +55,22 @@
 (defn redirect-to-root [request]
   (let [host (get-in request [:headers :host])]
     (handler/redirect request (str "http://" host "/"))))
+
+(defn- maybe-set-cookie-type [response cookie-type]
+  (if cookie-type
+    (cookies/set-cookie response "type" cookie-type)
+    response))
+
+(defn cookie [{:keys [query-params] :as request}]
+  (let [cookie-type (get query-params "type")]
+    (-> request
+      (response/create "Eat")
+      (maybe-set-cookie-type cookie-type))))
+
+(defn- present-cookie [{headers :headers}]
+  (if-let [-type (get-in headers [:cookie :type])]
+    (str "mmmm " -type)
+    ""))
+
+(defn eat-cookie [request]
+  (response/create request (present-cookie request)))

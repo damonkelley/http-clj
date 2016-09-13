@@ -20,6 +20,8 @@
        (GET "/logs"  (auth  #(handlers/log % log) "admin" "hunter2"))
        (GET "/coffee" handlers/no-coffee)
        (GET "/tea" handlers/tea)
+       (GET "/cookie" handlers/cookie)
+       (GET "/eat_cookie" handlers/eat-cookie)
        (POST "/form" #(handlers/submit-form % form-cache))
        (PUT "/form" #(handlers/submit-form % form-cache))
        (DELETE "/form" #(handlers/clear-submission % form-cache))

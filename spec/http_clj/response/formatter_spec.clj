@@ -12,7 +12,21 @@
   (first (string/split (byte-array->string message) #"\r\n")))
 
 (describe "response.formatter"
-  (context "format-message"
+  (describe "format-headers"
+    (it "formats a simple header"
+      (let [headers {:host "www.example.com"
+                     :content-type "text/html"}
+            expected (str "host: www.example.com\r\n"
+                          "content-type: text/html\r\n")]
+        (should= expected (format-headers headers))))
+
+    (it "formats headers that should appear multiple times"
+      (let [headers {:set-cookie ["key=value" "token=abc123"]}
+            expected (str "set-cookie: key=value\r\n"
+                          "set-cookie: token=abc123\r\n")]
+        (should= expected (format-headers headers)))))
+
+  (describe "format-message"
     (with request {:conn (mock/connection)})
 
     (it "is a valid HTTP response"

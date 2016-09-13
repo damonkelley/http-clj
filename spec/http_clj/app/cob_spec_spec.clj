@@ -114,6 +114,24 @@
     (it "responds with 200"
       (should= 200 (:status (client/get (str root "/tea"))))))
 
+  (describe "/cookie"
+    (it "responds with 200"
+      (should= 200 (:status (client/get (str root "/cookie")))))
+
+    (it "has Eat in the body"
+      (should= "Eat" (:body (client/get (str root "/cookie"))))))
+
+  (describe "/eat_cookie"
+    (it "responds with 200"
+      (let [resp (client/get (str root "/eat_cookie")
+                             {:headers {:cookie "type=chocolate"}})]
+        (should= 200 (:status resp))))
+
+    (it "has the type cookie value in the body"
+      (let [resp (client/get (str root "/eat_cookie")
+                             {:headers {:cookie "type=chocolate"}})]
+        (should= "mmmm chocolate" (:body resp)))))
+
   (it "shows the options at /method_options"
     (let [headers (:headers (OPTIONS "/method_options"))]
       (should= "GET,HEAD,POST,OPTIONS,PUT"(get headers "Allow"))))
