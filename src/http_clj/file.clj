@@ -11,21 +11,6 @@
       .toPath
       Files/readAllBytes))
 
-(defmulti binary-slurp-range
-  (fn [_ start end]
-    [(type start) (type end)]))
-
-(defmethod binary-slurp-range [Number nil]
-  [path start _]
-  (let [size (dec (.length (File. path)))]
-    (binary-slurp-range path start size)))
-
-(defmethod binary-slurp-range [nil Number]
-  [path _ end]
-  (let [size (dec (.length (File. path)))
-        start (inc (- size end))]
-    (binary-slurp-range path start size)))
-
 (defn- -binary-slurp-range [path start end]
   (let [buffer-size (inc (- end start))
         buffer (byte-array buffer-size)]
@@ -38,11 +23,32 @@
   (let [size (-> (File. path) .length dec)]
     (and (<= start size) (<= end size))))
 
-(defmethod binary-slurp-range [Number Number]
-  [path start end]
-  (when (not (valid-range? path start end))
+(defn binary-slurp-range [path start end]
+  (when-not (valid-range? path start end)
     (throw (ex-info "Range Unsatisfiable" {:cause :unsatisfiable})))
   (-binary-slurp-range path start end))
+
+(defmulti query-range
+  (fn [_ start end]
+    [(type start) (type end)]))
+
+(defmethod query-range [Number Number]
+  [path start end]
+  {:range (binary-slurp-range path start end)
+   :length (.length (io/file path))
+   :start start
+   :end end})
+
+(defmethod query-range [nil Number]
+  [path _ end]
+  (let [last-byte-position (dec (.length (io/file path)))
+        start (inc (- last-byte-position end))]
+    (query-range path start last-byte-position)))
+
+(defmethod query-range [Number nil]
+  [path start _]
+  (let [last-byte-position (dec (.length (io/file path)))]
+    (query-range path start last-byte-position)))
 
 (defn content-type-of [path]
   (URLConnection/guessContentTypeFromName path))
