@@ -34,15 +34,23 @@
         (should-contain (html [:a {:href "/dir/file-a"} "file-a"]) body))))
 
   (describe "file handlers"
-    (with test-path "/tmp/http-clj-test-file-handler")
+    (with file (File/createTempFile "http-clj-test-file-handler" ".txt"))
+    (with test-path (.getPath @file))
     (with test-data "Some content")
+
     (before (spit @test-path @test-data))
+    (after (.delete @file))
 
     (context "partial-file"
       (it "responds with a 206 if a range is provided"
         (let [request {:headers {:range {:start 0 :end 0}}}
               resp (handler/partial-file request @test-path)]
           (should= 206 (:status resp))))
+
+      (it "has the content type of the file"
+        (let [request {:headers {:range {:start 0 :end 0}}}
+              resp (handler/partial-file request @test-path)]
+          (should= "text/plain" (get-in resp [:headers :content-type]))))
 
       (it "it has the requested range in the body"
         (let [request {:headers {:range {:start 0 :end 3}}}
@@ -93,6 +101,10 @@
       (it "can accept a request and a file object"
         (let [{message :body} (handler/file {} @test-path)]
           (should= (seq message) (seq (.getBytes @test-data)))))
+
+      (it "the Content-Type header is included in the response"
+        (let [{headers :headers} (handler/file {} @test-path)]
+          (should= "text/plain" (:content-type headers))))
 
       (it "it uses partial-file if a range is provided"
         (let [request {:headers {:range {:start 0 :end 0}}}]

@@ -2,6 +2,7 @@
   (:require [http-clj.file :as f]
             [clojure.java.io :as io]
             [http-clj.response :as response]
+            [http-clj.response.helpers :as helpers]
             [http-clj.presentation.template :as template]
             [http-clj.presentation.presenter :as presenter]
             [http-clj.entity :as entity]))
@@ -14,9 +15,21 @@
 (defn partial-file [request path]
   (let [{start :start end :end} (get-in request [:headers :range])]
     (try
-      (response/create request (f/binary-slurp-range path start end) :status 206)
+      (-> request
+          (response/create (f/binary-slurp-range path start end) :status 206)
+          (helpers/add-content-type path))
       (catch clojure.lang.ExceptionInfo e
         (response/create request "" :status 416)))))
+
+(defn- -file [request path]
+  (-> request
+      (response/create (f/binary-slurp path))
+      (helpers/add-content-type path)))
+
+(defn file [{:keys [headers] :as request} path]
+  (if (not-empty (:range headers))
+      (partial-file request path)
+      (-file request path)))
 
 (defn- -patch-file [request file]
   (with-open [stream (clojure.java.io/output-stream file)]
@@ -34,8 +47,3 @@
     (cond (nil? precondition) (-patch-file request file)
           (if-match? precondition file) (-patch-file request file)
           :else (conflict request))))
-
-(defn file [{:keys [headers] :as request} path]
-  (if (not-empty (:range headers))
-      (partial-file request path)
-      (response/create request (f/binary-slurp path))))

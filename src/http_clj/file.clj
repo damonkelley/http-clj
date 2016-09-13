@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io])
   (:import java.io.File
            java.nio.file.Files
-           java.nio.file.Paths))
+           java.nio.file.Paths
+           java.net.URLConnection))
 
 (defn binary-slurp [path]
   (-> path
@@ -42,6 +43,9 @@
   (when (not (valid-range? path start end))
     (throw (ex-info "Range Unsatisfiable" {:cause :unsatisfiable})))
   (-binary-slurp-range path start end))
+
+(defn content-type-of [path]
+  (URLConnection/guessContentTypeFromName path))
 
 (defn resolve [root-dir path]
   (-> (Paths/get root-dir (into-array [path]))

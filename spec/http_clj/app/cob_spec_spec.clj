@@ -47,28 +47,32 @@
 (describe "cob-spec"
   (before-all (reset! thread (start-server app 5000)))
   (after-all (shutdown-server @thread))
-  (it "has /"
-    (let [{status :status body :body} (GET "/")]
-      (should= 200 status)
-      (should-contain "file.txt" body)
-      (should-contain "image.gif" body)))
 
-  (it "will attempt to patch a static file"
-    (let [resp (client/patch
-                 "http:localhost:5000/file.txt"
-                 {:headers {:if-match "incorrect-etag"}
-                  :throw-exceptions false})]
-      (should= 409 (:status resp))))
+  (describe "/ (static files)"
+    (it "displays the directory contents"
+      (let [{status :status body :body} (GET "/")]
+        (should= 200 status)
+        (should-contain "file.txt" body)
+        (should-contain "image.gif" body)))
 
-  (it "has /image.gif"
-    (should= 200 (:status (GET "/image.gif"))))
+    (it "will attempt to patch a file"
+      (let [resp (client/patch
+                   "http:localhost:5000/file.txt"
+                   {:headers {:if-match "incorrect-etag"}
+                    :throw-exceptions false})]
+        (should= 409 (:status resp))))
 
-  (it "can get partial contents of file.txt"
-    (let [resp (client/get "http://localhost:5000/file.txt"
-                           {:headers {:range "bytes=0-4"}})]
-      (should= 206 (:status resp))))
+    (it "has a Content-Type header"
+      (let [response (client/get (str root "/image.gif"))]
+        (should= "image/gif" (get-in response [:headers :content-type]))))
 
-  (it "has a viewable log when authenticated"
+    (it "accepts range requests"
+      (let [resp (client/get "http://localhost:5000/file.txt"
+                             {:headers {:range "bytes=0-4"}})]
+        (should= 206 (:status resp)))))
+
+  (describe "/logs"
+    (it "has a viewable log when authenticated"
     (let [response (client/get
                      "http://localhost:5000/logs"
                      {:basic-auth ["admin" "hunter2"]})]
@@ -76,7 +80,7 @@
 
   (it "unauthorized access to the log is not allowed"
     (let [response (GET "/logs")]
-      (should= 401 (:status response))))
+      (should= 401 (:status response)))))
 
   (describe "/form"
     (it "accepts POST requests"
@@ -132,21 +136,24 @@
                              {:headers {:cookie "type=chocolate"}})]
         (should= "mmmm chocolate" (:body resp)))))
 
-  (it "shows the options at /method_options"
+  (describe "/method_options*"
+    (it "shows the options at /method_options"
     (let [headers (:headers (OPTIONS "/method_options"))]
       (should= "GET,HEAD,POST,OPTIONS,PUT"(get headers "Allow"))))
 
   (it "shows the options at /method_options2"
     (let [headers (:headers (OPTIONS "/method_options2"))]
-      (should= "GET,OPTIONS" (get headers "Allow"))))
+      (should= "GET,OPTIONS" (get headers "Allow")))))
 
-  (it "presents the decoded and formatted query parameters"
+  (describe "/parameters"
+    (it "presents the decoded and formatted query parameters"
     (let [resp (client/get
                  (str root "/parameters")
                  {:query-params {"key" "value"}})]
-      (should= "key = value" (:body resp))))
+      (should= "key = value" (:body resp)))))
 
-  (it "redirects /redirect to /"
+  (describe "/redirect"
+    (it "redirects /redirect to /"
     (let [resp (client/get (str root "/redirect"))]
       (should= [(str root "/redirect") (str root "/")]
-               (:trace-redirects resp)))))
+               (:trace-redirects resp))))))

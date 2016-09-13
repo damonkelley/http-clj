@@ -24,7 +24,10 @@
       (let [headers {:set-cookie ["key=value" "token=abc123"]}
             expected (str "set-cookie: key=value\r\n"
                           "set-cookie: token=abc123\r\n")]
-        (should= expected (format-headers headers)))))
+        (should= expected (format-headers headers))))
+
+    (it "treats headers as simple headers by default"
+      (should= "content-type: \r\n" (format-headers {:content-type nil}))))
 
   (describe "format-message"
     (with request {:conn (mock/connection)})
