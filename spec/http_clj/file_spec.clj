@@ -1,11 +1,13 @@
 (ns http-clj.file-spec
   (:require [speclj.core :refer :all]
             [http-clj.file :as file]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io])
+  (:import java.io.File))
 
 (describe "file"
-  (with test-path "/tmp/http-clj-test-file")
-  (before (spit @test-path ""))
+  (with temp-file (File/createTempFile "http-clj-test-file" ".txt"))
+  (with test-path (.getPath @temp-file))
+  (after (.delete @temp-file))
 
   (context "binary-slurp"
     (with contents "the quick brown fox")
@@ -28,7 +30,11 @@
 
     (it "raises an exception if offset is outside of the length of the file"
       (should-throw clojure.lang.ExceptionInfo
-                    (file/query-range @test-path 0 5000)))
+                    (file/query-range @test-path 0 5000))
+      (should= {:cause :unsatisfiable :length 21}
+               (try (file/query-range @test-path 0 5000)
+                    (catch Exception e
+                      (ex-data e)))))
 
     (it "determines the length of the file"
       (spit @test-path "a")
@@ -72,11 +78,7 @@
 
     (it "can read bytes 1 through 4 of the file"
       (let [byte-range (file/binary-slurp-range @test-path 1 4)]
-        (should= "ead " (String. byte-range))))
-
-    (it "raises an exception if offset is outside of the length of the file"
-      (should-throw clojure.lang.ExceptionInfo
-                    (file/binary-slurp-range @test-path 0 5000))))
+        (should= "ead " (String. byte-range)))))
 
   (describe "content-type-of"
     (it "it determines the content type of the file"

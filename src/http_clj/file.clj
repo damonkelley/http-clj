@@ -11,7 +11,7 @@
       .toPath
       Files/readAllBytes))
 
-(defn- -binary-slurp-range [path start end]
+(defn binary-slurp-range [path start end]
   (let [buffer-size (inc (- end start))
         buffer (byte-array buffer-size)]
     (with-open [stream (io/input-stream path)]
@@ -23,21 +23,24 @@
   (let [size (-> (File. path) .length dec)]
     (and (<= start size) (<= end size))))
 
-(defn binary-slurp-range [path start end]
-  (when-not (valid-range? path start end)
-    (throw (ex-info "Range Unsatisfiable" {:cause :unsatisfiable})))
-  (-binary-slurp-range path start end))
-
 (defmulti query-range
   (fn [_ start end]
     [(type start) (type end)]))
 
-(defmethod query-range [Number Number]
-  [path start end]
+(defn- -query-range [path start end]
   {:range (binary-slurp-range path start end)
    :length (.length (io/file path))
    :start start
    :end end})
+
+(defmethod query-range [Number Number]
+  [path start end]
+  (when-not (valid-range? path start end)
+    (throw
+      (ex-info "Range Unsatisfiable"
+               {:cause :unsatisfiable
+                :length (.length (io/file path))})))
+  (-query-range path start end))
 
 (defmethod query-range [nil Number]
   [path _ end]
