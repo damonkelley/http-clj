@@ -17,13 +17,13 @@
   (fn [[_ field-value]]
     (type field-value)))
 
-(defmethod format-header String
-  [[field-name field-value]]
-  (str (name field-name) ": " field-value CRLF))
-
 (defmethod format-header clojure.lang.Seqable
   [[field-name field-values]]
   (apply str (map #(format-header [field-name %]) field-values)))
+
+(defmethod format-header :default
+  [[field-name field-value]]
+  (str (name field-name) ": " field-value CRLF))
 
 (defn format-headers [headers]
   (apply str (map format-header headers)))
