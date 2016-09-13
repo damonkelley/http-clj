@@ -12,12 +12,18 @@
         html (template/directory files)]
     (response/create request html :headers {"Content-Type" "text/html"})))
 
+(defn- -partial-file [request path]
+  (let [{:keys [start end units]} (get-in request [:headers :range])
+        {:keys [start end length range]} (f/query-range path start end)]
+    (-> request
+      (response/create range :status 206)
+      (helpers/add-content-type path)
+      (helpers/add-content-range "bytes" start end length))))
+
 (defn partial-file [request path]
   (let [{start :start end :end} (get-in request [:headers :range])]
     (try
-      (-> request
-          (response/create (f/binary-slurp-range path start end) :status 206)
-          (helpers/add-content-type path))
+      (-partial-file request path)
       (catch clojure.lang.ExceptionInfo e
         (response/create request "" :status 416)))))
 

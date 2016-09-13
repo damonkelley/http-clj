@@ -52,7 +52,7 @@
               resp (handler/partial-file request @test-path)]
           (should= "text/plain" (get-in resp [:headers :content-type]))))
 
-      (it "it has the requested range in the body"
+      (it "has the requested range in the body"
         (let [request {:headers {:range {:start 0 :end 3}}}
               resp (handler/partial-file request @test-path)]
           (should= "Some" (String. (:body resp))))
@@ -60,6 +60,15 @@
         (let [request {:headers {:range {:start 1 :end 3}}}
               resp (handler/partial-file request @test-path)]
           (should= "ome" (String. (:body resp)))))
+
+      (it "has a Content-Range header"
+        (let [request {:headers {:range {:start 0 :end 3}}}
+              resp (handler/partial-file request @test-path)]
+          (should= "bytes 0-3/12" (get-in resp [:headers :content-range])))
+
+        (let [request {:headers {:range {:start nil :end 3}}}
+              resp (handler/partial-file request @test-path)]
+          (should= "bytes 9-11/12" (get-in resp [:headers :content-range]))))
 
       (it "responds with a 416 if the range is not satisfiable"
         (let [request {:headers {:range {:start 1 :end 500}}}
