@@ -2,7 +2,7 @@
   (:require [http-clj.file :as f]
             [clojure.java.io :as io]
             [http-clj.response :as response]
-            [http-clj.response.helpers :as helpers]
+            [http-clj.response.headers :as headers]
             [http-clj.presentation.template :as template]
             [http-clj.presentation.presenter :as presenter]
             [http-clj.entity :as entity]))
@@ -12,24 +12,36 @@
         html (template/directory files)]
     (response/create request html :headers {"Content-Type" "text/html"})))
 
+(defn- -partial-file [request path]
+  (let [{:keys [start end units]} (get-in request [:headers :range])
+        {:keys [start end length range]} (f/query-range path start end)]
+    (-> request
+      (response/create range :status 206)
+      (headers/add-content-type path)
+      (headers/add-content-range units start end length))))
+
+(defn- range-unsatisfiable [request length]
+  (let [units (get-in request [:headers :range :units])]
+    (-> request
+        (response/create "" :status 416)
+        (headers/add-content-range units length))))
+
 (defn partial-file [request path]
   (let [{start :start end :end} (get-in request [:headers :range])]
     (try
-      (-> request
-          (response/create (f/binary-slurp-range path start end) :status 206)
-          (helpers/add-content-type path))
+      (-partial-file request path)
       (catch clojure.lang.ExceptionInfo e
-        (response/create request "" :status 416)))))
+        (range-unsatisfiable request (:length (ex-data e)))))))
 
 (defn- -file [request path]
   (-> request
       (response/create (f/binary-slurp path))
-      (helpers/add-content-type path)))
+      (headers/add-content-type path)))
 
 (defn file [{:keys [headers] :as request} path]
   (if (not-empty (:range headers))
-      (partial-file request path)
-      (-file request path)))
+    (partial-file request path)
+    (-file request path)))
 
 (defn- -patch-file [request file]
   (with-open [stream (clojure.java.io/output-stream file)]
