@@ -8,7 +8,8 @@
             [clojure.java.io :as io]
             [taoensso.timbre.appenders.core :as appenders])
   (:import java.io.ByteArrayOutputStream
-           java.util.concurrent.Executors))
+           java.util.concurrent.Executors)
+  (:gen-class))
 
 (def log (ByteArrayOutputStream.))
 (def form-cache (atom ""))

@@ -12,6 +12,9 @@
                  [clj-http "2.2.0"]
                  [com.taoensso/timbre "4.7.4"]
                  [hiccup "1.0.5"]]
-  :profiles {:dev {:dependencies [[speclj "3.3.1"]]}}
+  :profiles {:dev {:dependencies [[speclj "3.3.1"]]}
+             :cob-spec {:uberjar-name "http-clj-cob-spec.jar"
+                        :aot [http-clj.app.cob-spec]
+                        :main http-clj.app.cob-spec}}
   :plugins [[speclj "3.3.1"]]
   :test-paths ["spec"])
